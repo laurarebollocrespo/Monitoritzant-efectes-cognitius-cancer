@@ -77,7 +77,7 @@ class User:
         if not self.last_login:
             self.streak = 1
             self.last_login = today_str
-            db.update_streak(self.username, self.streak, self.last_login)
+            db.update_streak(self.username, self.streak)
             db.add_login_history(self.username)
             return
 
@@ -88,7 +88,7 @@ class User:
             # Si el format fos incorrecte, resetegem
             self.streak = 1
             self.last_login = today_str
-            db.update_streak(self.username, self.streak, self.last_login)
+            db.update_streak(self.username, self.streak)
             return
 
         delta = (today_date - last_login_date).days
@@ -100,13 +100,13 @@ class User:
             # Es va connectar ahir, sumem ratxa!
             self.streak += 1
             self.last_login = today_str
-            db.update_streak(self.username, self.streak, self.last_login)
+            db.update_streak(self.username, self.streak)
             db.add_login_history(self.username)
         else:
             # Ha passat més d'un dia, resetegem ratxa
             self.streak = 1
             self.last_login = today_str
-            db.update_streak(self.username, self.streak, self.last_login)
+            db.update_streak(self.username, self.streak)
             db.add_login_history(self.username)
 
     # --- MÈTODES D'ACTUALITZACIÓ ---
