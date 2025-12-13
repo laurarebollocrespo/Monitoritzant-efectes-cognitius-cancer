@@ -36,21 +36,21 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 # --- DEFINICIÓ PÀGINES ---
-login_page = st.Page("app/login.py", title="Accés", icon="🔒")
-home_page = st.Page("app/homepage.py", title="Inici", icon="🏠")
+login_page = st.Page("app/login.py", title="Accés")
+home_page = st.Page("app/homepage.py", title="Inici")
 
 # TESTS
-test_fluencia = st.Page("app/tests/fluencia.py", title="Fluència Verbal", icon="🗣️")
-test_atencio = st.Page("app/tests/atencio.py", title="Atenció", icon="👀")
-test_memoria = st.Page("app/tests/memoria.py", title="Memòria", icon="🧠")
-test_velocitat = st.Page("app/tests/velocitat.py", title="Velocitat", icon="⚡")
+test_fluencia = st.Page("app/tests/fluencia.py", title="Fluència Verbal")
+test_atencio = st.Page("app/tests/atencio.py", title="Atenció")
+test_memoria = st.Page("app/tests/memoria.py", title="Memòria")
+test_velocitat = st.Page("app/tests/velocitat.py", title="Velocitat")
 
 # EINES
-checkin_page = st.Page("app/checkin.py", title="Check-in Diari", icon="😊")
-incidencies_page = st.Page("app/incidencies.py", title="Incidències", icon="⚠️")
-log_page = st.Page("app/log.py", title="Diari", icon="📔")
-stats_page = st.Page("app/stats.py", title="Estadístiques", icon="📊")
-eines_page = st.Page("app/eines.py", title="Recursos", icon="🛠️")
+checkin_page = st.Page("app/checkin.py", title="Check-in Diari")
+incidencies_page = st.Page("app/incidencies.py", title="Incidències")
+log_page = st.Page("app/log.py", title="Diari")
+stats_page = st.Page("app/stats.py", title="Estadístiques")
+eines_page = st.Page("app/eines.py", title="Recursos")
 
 # --- NAVEGACIÓ ---
 if st.session_state.logged_in:

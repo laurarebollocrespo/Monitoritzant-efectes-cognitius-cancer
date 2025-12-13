@@ -14,13 +14,13 @@ COUNTDOWN = 3
 # -----------------------------
 if "screen" not in st.session_state:
     st.session_state.screen = "instructions"
-if "numbers" not in st.session_state:
-    st.session_state.numbers = random.sample(range(1, 100), N_NUMBERS)
+if "numbers_velocitat" not in st.session_state:
+    st.session_state.numbers_velocitat = random.sample(range(1, 100), N_NUMBERS)
 if "expected" not in st.session_state:
-    st.session_state.expected = min(st.session_state.numbers)
+    st.session_state.expected = min(st.session_state.numbers_velocitat)
 if "positions" not in st.session_state:
     st.session_state.positions = []
-    for n in st.session_state.numbers:
+    for n in st.session_state.numbers_velocitat:
         st.session_state.positions.append({
             "number": n,
             "col": random.randint(0, BOARD_COLS-1),
@@ -76,7 +76,7 @@ elif st.session_state.screen == "test":
                 if n == st.session_state.expected:
                     item["color"] = "lightgreen"
                     st.session_state.click_times.append(time.time())
-                    remaining = sorted(st.session_state.numbers)
+                    remaining = sorted(st.session_state.numbers_velocitat)
                     idx = remaining.index(n)
                     if idx + 1 < len(remaining):
                         st.session_state.expected = remaining[idx+1]

@@ -20,7 +20,7 @@ def init_db() -> None:
             password TEXT NOT NULL,
             name TEXT,
             last_login DATE DEFAULT CURRENT_DATE,
-            streak INTEGER DEFAULT 0 
+            streak INTEGER DEFAULT 1 
         )
     ''')
     # TAULA: login_history
@@ -59,7 +59,7 @@ def init_db() -> None:
     c.execute('''
         CREATE TABLE IF NOT EXISTS incidencies (
             username TEXT,
-            date DATE DEFAULT CURRENT_DATE,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             incidencia INTEGER CHECK(incidencia BETWEEN 0 AND 9),
             PRIMARY KEY(username, date, incidencia),
             FOREIGN KEY(username) REFERENCES users(username)
@@ -111,14 +111,6 @@ def check_login(username, password) -> type_user | None:
     
     return data # Retorna None si no el troba
 
-def add_login_history(username) -> None:
-    """Afegeix una entrada a l'historial de logins."""
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('INSERT INTO login_history (username) VALUES (?)', (username,))
-    conn.commit()
-    conn.close()
-
 
 # --- getters ---
 
@@ -159,6 +151,13 @@ def update_streak(username, new_streak) -> None:
     conn.close()
 
 # --- Funcions per guardar dades de l'app ---
+def add_login_history(username) -> None:
+    """Afegeix una entrada a l'historial de logins."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('INSERT INTO login_history (username) VALUES (?)', (username,))
+    conn.commit()
+    conn.close()
 
 def save_test_result(username, test_type, score)-> None:
     """Guarda la puntuació d'un test."""

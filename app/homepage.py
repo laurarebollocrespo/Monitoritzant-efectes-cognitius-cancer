@@ -25,15 +25,11 @@ BRAIN_PATH = "images/brain_areas.png"
 st.markdown(f"""
     <style>
     /* Importar font neta */
-    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
-    
-    html, body, [class*="css"] {{
-        font-family: 'Open Sans', sans-serif;
-    }}
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
-    /* Amagar header per defecte de Streamlit */
-    header {{visibility: hidden;}}
-    .stApp {{ margin-top: -50px; }} /* Pujar contingut */
+    html, body, [class*="css"] {{
+        font-family: 'Poppins', sans-serif;
+    }}
 
     /* 1. HEADER PERSONALITZAT */
     .custom-header {{
@@ -211,18 +207,7 @@ with col_actions:
     
     if st.button("Què m'ha passat?"):
         st.switch_page("app/incidencies.py")
-        
-    # Text gran "EINES" a baix a la dreta
-    st.markdown('<div class="eines-title">EINES</div>', unsafe_allow_html=True)
-    
+            
     # Àrea clicable per anar a Eines (com a botó invisible o botó text)
     if st.button("Veure totes les eines ->", key="btn_eines", use_container_width=True):
         st.switch_page("app/eines.py")
-
-# --- LOGOUT REAL (Barra lateral per funcionalitat) ---
-with st.sidebar:
-    st.write(f"Sessió de: **{user.name}**")
-    if st.button("Tancar Sessió", use_container_width=True):
-        st.session_state.logged_in = False
-        st.session_state.user = None
-        st.rerun()

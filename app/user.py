@@ -6,6 +6,13 @@ from datetime import datetime, timedelta
 from app import database as db
 
 class User:
+    name: str
+    username: str
+    streak: int
+    last_login: str  # Data en format string "YYYY-MM-DD"
+    test_results: dict[str, list[float]]  # Resultats per tipus de test
+    daily_check_in: dict[str, int]  # Historial de check-ins diaris {data: face}
+
     def __init__(self, username):
         self.username = username
         
@@ -22,6 +29,7 @@ class User:
 
         # 2. Calcular Ratxa
         self._calculate_streak()
+        self.registrar_login()
 
         # 3. Carregar Historials
         self.test_results = {
@@ -31,6 +39,7 @@ class User:
             "Velocitat": db.get_test_history(username, "Velocitat")
         }
         self.daily_check_in = db.get_checkin_history(username)
+
 
     def _calculate_streak(self):
         """Calcula la ratxa basant-se en l'última connexió."""
@@ -103,3 +112,7 @@ class User:
         
     def registrar_log(self, text: str):
         db.save_log(self.username, text)
+    
+    def registrar_login(self):
+        """Registra un nou login a la DB."""
+        db.add_login_history(self.username)

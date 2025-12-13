@@ -1,98 +1,150 @@
 import streamlit as st
 import time
 from datetime import datetime
+import base64
 
-# --- CONFIGURACIÓ DE PÀGINA (Només si s'executa sol, però main.py ja ho gestiona) ---
-# st.set_page_config(page_title="Check-in Diari", page_icon="😊")
+# --- FUNCIÓ PER LLEGIR IMATGES (Mantenim la teva lògica) ---
+def get_base64_of_bin_file(bin_file):
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except FileNotFoundError:
+        return None
 
-# --- RECUPERAR L'USUARI ACTUAL ---
-if 'user' not in st.session_state:
-    st.error("No s'ha trobat l'usuari. Si us plau, torna a fer login.")
-    st.stop()
+def img_base64_html(base64_str, width=100):
+    if base64_str is None: return ""
+    return f'<img src="data:image/png;base64,{base64_str}" style="width:{width}px; display:block; margin:auto;">'
 
-user = st.session_state['user']
+# --- CARREGAR IMATGES ---
+# Assegura't que les rutes són correctes
+FACE1 = img_base64_html(get_base64_of_bin_file("images/1.png"))
+FACE2 = img_base64_html(get_base64_of_bin_file("images/2.png"))
+FACE3 = img_base64_html(get_base64_of_bin_file("images/3.png"))
+FACE4 = img_base64_html(get_base64_of_bin_file("images/4.png"))
+FACE5 = img_base64_html(get_base64_of_bin_file("images/5.png"))
 
-# --- CSS PERSONALITZAT PER AL CHECK-IN ---
+
+user = st.session_state.user
+
+# --- CSS NECESSARI ---
 st.markdown("""
     <style>
-    .checkin-container {
+    /* Part de dalt de la targeta */
+    .header-card {
+        background-color: #F0FFF4; /* Verd molt suau */
+        padding: 25px 20px 10px 20px;
+        border-radius: 20px 20px 0 0; /* Arrodonit DALT */
+        text-align: center;
+        margin-bottom: 0px;
+    }
+    
+    /* Part de baix de la targeta */
+    .footer-card {
+        background-color: #F0FFF4; /* Mateix verd */
+        padding: 10px 20px 25px 20px;
+        border-radius: 0 0 20px 20px; /* Arrodonit BAIX */
+        text-align: center;
+        margin-top: 0px;
+    }
+
+    /* Targeta completa (quan ja ha votat) */
+    .full-card {
         background-color: #F0FFF4;
         padding: 30px;
         border-radius: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
-    .checkin-title {
-        color: #2E7D32;
-        font-size: 28px;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    .checkin-subtitle {
-        color: #558B2F;
-        font-size: 18px;
-        margin-bottom: 30px;
-    }
+
+    .title-text { color: #2E7D32; font-size: 24px; font-weight: bold; }
+    .subtitle-text { color: #558B2F; font-size: 16px; margin-bottom: 10px; }
+    .result-text { font-size: 22px; font-weight: 600; color: #2E7D32; margin-top: 10px; }
     
-    /* Estilitzar el slider per fer-lo més amable (limitat en Streamlit pur, però ho intentem) */
-    .stSlider > div > div > div > div {
-        background-color: #81C784;
+    /* Truc visual: treure marge al slider perquè s'enganxi visualment */
+    div[data-testid="stSlider"] {
+        margin-top: -20px;
+        padding-bottom: 0px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- CAPÇALERA ---
-st.markdown("<div class='checkin-container'>", unsafe_allow_html=True)
-st.markdown(f"<div class='checkin-title'>Bon dia, {user.name}! ☀️</div>", unsafe_allow_html=True)
-st.markdown("<div class='checkin-subtitle'>Com sents el teu cap avui?</div>", unsafe_allow_html=True)
-
-# --- LÒGICA DEL CHECK-IN ---
-
-# Comprovar si ja ha fet check-in avui
+# --- LÒGICA PRINCIPAL ---
 avui = datetime.now().strftime("%Y-%m-%d")
-valor_anterior = user.daily_check_in.get(avui, 3) # Per defecte 3 si no hi és
+valor_anterior = user.daily_check_in.get(avui)
 
-# Definició de les cares/estats
 cares = {
-    1: "😫 Molt boirós/Lent",
-    2: "😕 Una mica espès",
-    3: "😐 Normal / Regular",
-    4: "🙂 Bastant bé",
-    5: "😁 Molt clar i àgil"
+    1: (FACE1, "Molt boirós / Lent"),
+    2: (FACE2, "Una mica espès"),
+    3: (FACE3, "Normal / Regular"),
+    4: (FACE4, "Bastant bé"),
+    5: (FACE5, "Molt clar i àgil")
 }
 
-# Utilitzem un select_slider perquè és més visual que un slider numèric
-estat_anim = st.select_slider(
-    "Selecciona el teu estat:",
-    options=[1, 2, 3, 4, 5],
-    value=valor_anterior,
-    format_func=lambda x: cares[x]
-)
-
-# Visualització gran de l'emoji seleccionat
-emojis_grans = {
-    1: "😫", 2: "😕", 3: "😐", 4: "🙂", 5: "😁"
-}
-st.markdown(f"<div style='font-size: 80px; margin: 20px 0;'>{emojis_grans[estat_anim]}</div>", unsafe_allow_html=True)
-
-# Botó de guardar
-if st.button("Guardar el meu estat", use_container_width=True, type="primary"):
-    # Guardar a través de l'objecte User (que guarda a DB)
-    user.registrar_checkin(estat_anim)
+# -----------------------------------------------
+# CAS 1: JA HA REGISTRAT AVUI (Targeta única)
+# -----------------------------------------------
+if valor_anterior is not None:
+    face_html, label = cares[valor_anterior]
     
-    st.balloons()
-    st.success("Registrat correctament! Gràcies per compartir-ho.")
-    
-    # Feedback personalitzat segons la puntuació
-    if estat_anim <= 2:
-        st.info("💡 Avui sembla un dia difícil. No et forcis. Prova el recurs de **Mindfulness** a la secció d'Eines.")
-    elif estat_anim >= 4:
-        st.info("🌟 Fantàstic! És un bon moment per provar un test de **Velocitat** o **Memòria**.")
-    
-    time.sleep(3)
-    st.switch_page("app/homepage.py")
+    st.markdown(f"""
+        <div class="full-card">
+            <div class="title-text">Bon dia, {user.name}! ☀️</div>
+            <div class="subtitle-text">Avui has registrat:</div>
+            <div style="margin: 20px 0;">{face_html}</div>
+            <div class="result-text">{label}</div>
+        </div>
+    """, unsafe_allow_html=True)
 
-st.markdown("</div>", unsafe_allow_html=True)
+# -----------------------------------------------
+# CAS 2: ENCARA NO HA REGISTRAT (Targeta Partida)
+# -----------------------------------------------
+else:
+    # 1. BLOC SUPERIOR (HTML PUR)
+    st.markdown(f"""
+        <div class="header-card">
+            <div class="title-text">Bon dia, {user.name}! ☀️</div>
+            <div class="subtitle-text">Com sents el teu cap avui?</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # 2. SLIDER (WIDGET STREAMLIT)
+    # Està fora del div, però visualment semblarà a dins pel CSS
+    valor_defecte = 3
+    estat_anim = st.select_slider(
+        "Selecciona el teu estat", # Label invisible per accessibilitat
+        options=[1, 2, 3, 4, 5],
+        value=valor_defecte,
+        format_func=lambda x: "", # No mostrem text al slider, només els punts
+        label_visibility="collapsed"
+    )
+    
+    # Calculem què mostrar segons el slider
+    face_html, label = cares[estat_anim]
+
+    # 3. BLOC INFERIOR (HTML PUR)
+    st.markdown(f"""
+        <div class="footer-card">
+            <div style="margin-top: 0px; margin-bottom: 15px;">
+                <div style="transform: scale(1.2);">
+                    {face_html}
+                </div>
+            </div>
+            <div class="result-text">{label}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # 4. BOTÓ (Natiu Streamlit)
+    if st.button("Guardar el meu estat", type="primary", use_container_width=True):
+        user.registrar_checkin(estat_anim)
+        # Feedback personalitzat segons la puntuació
+        if estat_anim <= 2:
+            st.info("💡 Avui sembla un dia difícil. No et forcis. Prova el recurs de **Mindfulness** a la secció d'Eines.")
+        elif estat_anim >= 4:
+            st.info("🌟 Fantàstic! És un bon moment per provar un test de **Velocitat** o **Memòria**.")
+            st.balloons()
+
+st.write("") # Espai
 
 # --- MOSTRAR HISTÒRIC RECENT (OPCIONAL) ---
 with st.expander("Veure els meus últims dies"):
@@ -100,7 +152,6 @@ with st.expander("Veure els meus últims dies"):
         # Convertir a llista per mostrar
         dates = list(user.daily_check_in.keys())[-7:] # Últims 7 dies
         valors = [user.daily_check_in[d] for d in dates]
-        
         # Petit gràfic de línies simple
         st.line_chart(valors)
     else:
