@@ -15,7 +15,7 @@ if st.button("Prueba de tiempo de reacción"):
     time.sleep(1)
     start = time.time()
     st.write("¡Pulsa ahora!")
-    if st.button("PULSA"):
+    if st.button("PULSA"): 
         rt = time.time() - start
         st.write(f"Tu tiempo de reacción es: {rt:.3f} segundos")
 
