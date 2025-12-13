@@ -2,7 +2,8 @@ import sqlite3
 import hashlib
 
 DB_NAME = "oncoconnect.db"
-type_user = tuple[str, str, str, int] #username, password, name, strike
+type_user = tuple[str, str, str, str, int]  # username, password, name, last_login, strike
+
 
 def init_db() -> None:
     """Inicialitza la base de dades si no existeix."""
@@ -16,8 +17,7 @@ def init_db() -> None:
             password TEXT NOT NULL,
             name TEXT,
             last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            strike INTEGER DEFAULT 0,
-            
+            strike INTEGER DEFAULT 0 
         )
     ''')
     

@@ -1,5 +1,6 @@
 import streamlit as st
 import time
+from datetime import datetime
 import random
 import pandas as pd
 import plotly.express as px
@@ -9,7 +10,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import database as db
 
-today = time.
+today = datetime.now().date()
 
 # --- CONFIGURACIÓ DE LA PÀGINA ---
 st.set_page_config(
