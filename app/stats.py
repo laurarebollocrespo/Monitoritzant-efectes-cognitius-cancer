@@ -4,7 +4,8 @@ import sqlite3
 import matplotlib.pyplot as plt
 
 # Connexió a la base de dades
-DB_PATH = Path(__file__).resolve().parent / "onco_connect.db"
+REPO_PATH = Path(__file__).resolve().parent.parent  # Si stats.py està dins app/, parent.parent va a la arrel
+DB_PATH = REPO_PATH / "onco_connect.db"
 conn = sqlite3.connect(str(DB_PATH))
 c = conn.cursor()
 
