@@ -9,6 +9,7 @@ class User:
     name: str
     username: str
     streak: int
+    admin: bool
     last_login: str  # Data en format string "YYYY-MM-DD"
     test_results: dict[str, list[float]]  # Resultats per tipus de test
     daily_check_in: dict[str, int]  # Historial de check-ins diaris {data: face}
@@ -19,29 +20,53 @@ class User:
         
         # 1. Carregar dades de la DB
         user_info = db.get_user_info(username)
+        print(user_info)
         if user_info:
             self.name = user_info[0]
             self.streak = user_info[1] if user_info[1] is not None else 0
             self.last_login = user_info[2] # String YYYY-MM-DD
+            self.admin = True if user_info[3] else False
+
         else:
             self.name = "Unknown"
             self.streak = 0
             self.last_login = None
+        if user_info:
+            self.name = user_info[0]
+            self.streak = user_info[1] if user_info[1] is not None else 0
+            self.last_login = user_info[2]
+            # Capturem el flag d'admin (1 = True, 0 = False)
+            self.is_admin = True if user_info[3] == 1 else False
+        else:
+            self.name = "Unknown"
+            self.streak = 0
+            self.last_login = None
+            self.is_admin = False
 
-        # 2. Calcular Ratxa
-        self._calculate_streak()
-        self.registrar_login()
+        # Si és admin, no cal calcular streak ni carregar tests seus
+        if not self.is_admin:
+            self._calculate_streak()
+            # Carregar dades només si és pacient
+            self.test_results = {
+                "Fluencia": db.get_test_history(username, "Fluencia"),
+                "Atencio": db.get_test_history(username, "Atencio"),
+                "Memoria": db.get_test_history(username, "Memoria"),
+                "Velocitat": db.get_test_history(username, "Velocitat")
+            }
+            self.daily_check_in = db.get_checkin_history(username)
 
-        # 3. Carregar Historials
-        self.test_results = {
+            self.test_results = {
             "Fluencia": db.get_test_history(username, "Fluencia"),
             "Atencio": db.get_test_history(username, "Atencio"),
             "Memoria": db.get_test_history(username, "Memoria"),
             "Velocitat": db.get_test_history(username, "Velocitat")
-        }
-        self.daily_check_in = db.get_checkin_history(username)
-        self.logs = db.get_logs(username)
+            }
+            self.daily_check_in = db.get_checkin_history(username)
+            self.logs = db.get_logs(username)
 
+        self.registrar_login()
+           
+        
 
     def _calculate_streak(self):
         """Calcula la ratxa basant-se en l'última connexió."""
