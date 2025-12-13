@@ -8,39 +8,40 @@ import threading
 # -----------------------------
 # Dataset de palabras
 # -----------------------------
-fields = {  
-    "frutas": [
-        "manzana", "pera", "plátano", "naranja", "fresa", "melón", "sandía", "kiwi", "mango", "cereza",
-        "limón", "piña", "mandarina", "arándano", "coco", "papaya", "maracuyá", "guayaba", "higo", "ciruela",
-        "frambuesa", "mora", "lichi", "caqui", "granada", "pomelo", "nectarina", "albaricoque", "uva", "plumón"
+fields = {
+    "fruites": [
+        "poma", "pera", "plàtan", "taronja", "maduixa", "meló", "síndria", "kiwi", "mango", "cirera",
+        "llimona", "pinya", "mandarina", "nabiu", "coco", "papaia", "maracujà", "guaiaba", "figa", "pruna",
+        "gerd", "móra", "litxi", "caqui", "magrana", "aranja", "nectarina", "albercoc", "raïm", "plomissol"
     ],
-    "animales": [
-        "gato", "perro", "elefante", "tigre", "león", "jirafa", "caballo", "oveja", "conejo", "mono",
-        "tiburón", "colibrí", "cerdo", "lobo", "oso", "zorro", "pingüino", "delfín", "ballena", "águila",
-        "águila calva", "búho", "halcón", "lince", "camello", "cabra", "vaca", "pollo", "gallina", "pato",
-        "ganso", "tortuga", "rana", "serpiente", "iguana", "murciélago", "orca", "foca", "nutria", "canguro"
+    "animals": [
+        "gat", "gos", "elefant", "tigre", "lleó", "girafa", "cavall", "ovella", "conill", "mico",
+        "tauró", "colibrí", "porc", "llop", "ós", "guineu", "pingüí", "dofí", "balena", "àguila",
+        "àguila calba", "mussol", "falcó", "linx", "camell", "cabra", "vaca", "pollastre", "gallina", "ànec",
+        "oca", "tortuga", "granota", "serp", "iguana", "ratpenat", "orca", "foca", "llúdriga", "cangur"
     ],
-    "colores": [
-        "rojo", "azul", "verde", "amarillo", "negro", "blanco", "morado", "rosa", "naranja", "gris",
-        "cian", "magenta", "lila", "turquesa", "beige", "ocre", "fucsia", "lavanda", "marfil", "bronce",
-        "esmeralda", "salmón", "carmesí", "añil", "granate", "púrpura", "azafrán", "marrón", "mostaza", "verde oliva"
+    "colors": [
+        "vermell", "blau", "verd", "groc", "negre", "blanc", "morat", "rosa", "taronja", "gris",
+        "cian", "magenta", "lila", "turquesa", "beix", "ocre", "fúcsia", "lavanda", "ivori", "bronze",
+        "maragda", "salmó", "carmesí", "anyil", "grana", "porpra", "safrà", "marró", "mostassa", "verd oliva"
     ],
-    "transportes": [
-        "coche", "autobús", "bicicleta", "moto", "avión", "tren", "barco", "metro", "tranvía", "patinete",
-        "camión", "helicóptero", "ferry", "submarino", "globlo aerostático", "monopatín", "velero", "yate", "trineo", "caravana"
+    "transports": [
+        "cotxe", "autobús", "bicicleta", "moto", "avió", "tren", "vaixell", "metro", "tramvia", "patinet",
+        "camió", "helicòpter", "ferri", "submarí", "globus aerostàtic", "monopatí", "veler", "iot", "trineu", "caravana"
     ],
-    "ropa": [
-        "camisa", "pantalón", "falda", "vestido", "chaqueta", "abrigo", "zapato", "bota", "sandalia", "gorra",
-        "sombrero", "bufanda", "guantes", "calcetines", "cinturón", "traje", "camiseta", "jersey", "chaquetón", "chaleco"
+    "roba": [
+        "camisa", "pantalons", "faldilla", "vestit", "jaqueta", "abric", "sabata", "bota", "sandàlia", "gorra",
+        "barret", "bufanda", "guants", "mitjons", "cinturó", "vestit (traje)", "samarreta", "jersei", "jaquetó", "armilla"
     ]
 }
 
+
 field_representatives = {
-    "frutas": "fruta",
-    "animales": "animal",
-    "colores": "color",
-    "transportes": "vehículo",
-    "ropa": "prenda de ropa"
+    "fruites": "fruita",
+    "animals": "animal",
+    "colors": "color",
+    "transports": "vehicle",
+    "roba": "prenda de roba"
 }
 
 # -----------------------------
@@ -97,8 +98,8 @@ def validar_campo(word, field):
 def validar_campo_gpt(word, field, idx, pending_results):
     try:
         prompt = (
-            f"Responde solo con SI o NO.\n"
-            f"¿La palabra '{word}' es un/una {field_representatives[field]}?"
+            f"Respon només amb SI o NO.\n"
+            f"La paraula '{word}' és un/una {field_representatives[field]}?"
         )
 
         response = client.chat.completions.create(
@@ -108,7 +109,7 @@ def validar_campo_gpt(word, field, idx, pending_results):
         )
 
         answer = response.choices[0].message.content.strip().upper()
-        result = "correct" if answer == "SI" else "incorrect"
+        result = "correct" if answer == "SI" or answer == "SI." else "incorrect"
 
     except Exception:
         result = "incorrect"
