@@ -8,39 +8,39 @@ import threading
 # -----------------------------
 # Dataset de palabras
 # -----------------------------
-fields = {
-    "fruites": [
-        "poma", "pera", "plàtan", "taronja", "maduixa", "meló", "síndria", "kiwi", "mango", "cirera",
-        "llimona", "pinya", "mandarina", "nabiu", "coco", "papaia", "maracujà", "guaiaba", "figa", "pruna",
-        "gerd", "móra", "litxi", "caqui", "magrana", "aranja", "nectarina", "albercoc", "raïm", "plomissol"
+fields = {  
+    "frutas": [
+        "manzana", "pera", "plátano", "naranja", "fresa", "melón", "sandía", "kiwi", "mango", "cereza",
+        "limón", "piña", "mandarina", "arándano", "coco", "papaya", "maracuyá", "guayaba", "higo", "ciruela",
+        "frambuesa", "mora", "lichi", "caqui", "granada", "pomelo", "nectarina", "albaricoque", "uva", "plumón"
     ],
-    "animals": [
-        "gat", "gos", "elefant", "tigre", "lleó", "girafa", "cavall", "ovella", "conill", "mico",
-        "tauró", "colibrí", "porc", "llop", "ós", "guineu", "pingüí", "dofí", "balena", "àguila",
-        "àguila calba", "mussol", "falcó", "linx", "camell", "cabra", "vaca", "pollastre", "gallina", "ànec",
-        "oca", "tortuga", "granota", "serp", "iguana", "ratpenat", "orca", "foca", "llúdriga", "cangur"
+    "animales": [
+        "gato", "perro", "elefante", "tigre", "león", "jirafa", "caballo", "oveja", "conejo", "mono",
+        "tiburón", "colibrí", "cerdo", "lobo", "oso", "zorro", "pingüino", "delfín", "ballena", "águila",
+        "águila calva", "búho", "halcón", "lince", "camello", "cabra", "vaca", "pollo", "gallina", "pato",
+        "ganso", "tortuga", "rana", "serpiente", "iguana", "murciélago", "orca", "foca", "nutria", "canguro"
     ],
-    "colors": [
-        "vermell", "blau", "verd", "groc", "negre", "blanc", "morat", "rosa", "taronja", "gris",
-        "cian", "magenta", "lila", "turquesa", "beix", "ocre", "fúcsia", "lavanda", "ivori", "bronze",
-        "maragda", "salmó", "carmesí", "anyil", "grana", "porpra", "safrà", "marró", "mostassa", "verd oliva"
+    "colores": [
+        "rojo", "azul", "verde", "amarillo", "negro", "blanco", "morado", "rosa", "naranja", "gris",
+        "cian", "magenta", "lila", "turquesa", "beige", "ocre", "fucsia", "lavanda", "marfil", "bronce",
+        "esmeralda", "salmón", "carmesí", "añil", "granate", "púrpura", "azafrán", "marrón", "mostaza", "verde oliva"
     ],
-    "transports": [
-        "cotxe", "autobús", "bicicleta", "moto", "avió", "tren", "vaixell", "metro", "tramvia", "patinet",
-        "camió", "helicòpter", "ferri", "submarí", "globus aerostàtic", "monopatí", "veler", "iot", "trineu", "caravana"
+    "transportes": [
+        "coche", "autobús", "bicicleta", "moto", "avión", "tren", "barco", "metro", "tranvía", "patinete",
+        "camión", "helicóptero", "ferry", "submarino", "globlo aerostático", "monopatín", "velero", "yate", "trineo", "caravana"
     ],
-    "roba": [
-        "camisa", "pantalons", "faldilla", "vestit", "jaqueta", "abric", "sabata", "bota", "sandàlia", "gorra",
-        "barret", "bufanda", "guants", "mitjons", "cinturó", "vestit (traje)", "samarreta", "jersei", "jaquetó", "armilla"
+    "ropa": [
+        "camisa", "pantalón", "falda", "vestido", "chaqueta", "abrigo", "zapato", "bota", "sandalia", "gorra",
+        "sombrero", "bufanda", "guantes", "calcetines", "cinturón", "traje", "camiseta", "jersey", "chaquetón", "chaleco"
     ]
 }
 
 field_representatives = {
-    "fruites": "fuita",
-    "animals": "animal",
-    "colors": "color",
-    "transports": "vehicle",
-    "roba": "prenda de roba"
+    "frutas": "fruta",
+    "animales": "animal",
+    "colores": "color",
+    "transportes": "vehículo",
+    "ropa": "prenda de ropa"
 }
 
 # -----------------------------
@@ -59,11 +59,10 @@ with open("noms-fdic.txt", "r", encoding="utf-8") as f:
             all_words_list.append(word.lower())  # para get_close_matches
 
 TEST_DURATION = 60
-
 # -----------------------------
 # Configuración OpenAI
 # -----------------------------
-API_KEY = "INSERTE_AQUI_API_KEY"
+API_KEY = "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"
 client = openai.OpenAI(api_key=API_KEY)
 
 # -----------------------------
@@ -98,8 +97,8 @@ def validar_campo(word, field):
 def validar_campo_gpt(word, field, idx, pending_results):
     try:
         prompt = (
-            f"Respon només amb un SI o NO.\n"
-            f"La paraula '{word}' és un/una {field_representatives[field]}?"
+            f"Responde solo con SI o NO.\n"
+            f"¿La palabra '{word}' es un/una {field_representatives[field]}?"
         )
 
         response = client.chat.completions.create(
@@ -109,7 +108,7 @@ def validar_campo_gpt(word, field, idx, pending_results):
         )
 
         answer = response.choices[0].message.content.strip().upper()
-        result = "correct" if answer == "SI" or answer == "SI." else "incorrect"
+        result = "correct" if answer == "SI" else "incorrect"
 
     except Exception:
         result = "incorrect"
@@ -223,7 +222,6 @@ elif st.session_state.screen == "test":
         symbol = {
             "correct": "✅",
             "incorrect": "❌",
-            "pendint": "⏳"
         }[w["state"]]
 
         st.markdown(
@@ -253,6 +251,7 @@ elif st.session_state.screen == "results":
 
     st.write(f"✅ Correctas: {correct}")
     st.write(f"❌ Incorrectas: {incorrect}")
+    st.write(f"⏳ Pendientes: {pending}")
 
     if st.button("Reiniciar"):
         for k in list(st.session_state.keys()):
