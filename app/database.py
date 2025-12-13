@@ -123,7 +123,7 @@ def get_user_info(username) -> tuple[str, int, str] | None:
     conn.close()
     return data
 
-def get_test_history(username, test_type) -> list[float]:
+def get_test_history(username, test_type) -> list[float]| None:
     """Retorna llista de puntuacions d'un test específic ordenades per data."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -133,7 +133,7 @@ def get_test_history(username, test_type) -> list[float]:
     conn.close()
     return [x[0] for x in data] # Convertir llista de tuples a llista plana
 
-def get_checkin_history(username) -> dict[str, int]:
+def get_checkin_history(username) -> dict[str, int]| None:
     """Retorna dict {data: face}."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -149,6 +149,15 @@ def update_streak(username, new_streak) -> None:
     c.execute('UPDATE users SET streak = ? WHERE username = ?', (new_streak, username))
     conn.commit()
     conn.close()
+
+def get_logs(username) -> list[tuple[str, str]]|None:
+    """Retorna llista de logs (date, text) de l'usuari."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT date, text FROM logs WHERE username = ? ORDER BY date ASC', (username,))
+    data = c.fetchall()
+    conn.close()
+    return data
 
 # --- Funcions per guardar dades de l'app ---
 def add_login_history(username) -> None:
