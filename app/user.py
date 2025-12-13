@@ -12,6 +12,7 @@ class User:
     last_login: str  # Data en format string "YYYY-MM-DD"
     test_results: dict[str, list[float]]  # Resultats per tipus de test
     daily_check_in: dict[str, int]  # Historial de check-ins diaris {data: face}
+    logs: list[tuple[str, str]]  # Historial de logs (date, text)
 
     def __init__(self, username):
         self.username = username
@@ -39,6 +40,7 @@ class User:
             "Velocitat": db.get_test_history(username, "Velocitat")
         }
         self.daily_check_in = db.get_checkin_history(username)
+        self.logs = db.get_logs(username)
 
 
     def _calculate_streak(self):
@@ -97,20 +99,24 @@ class User:
         db.save_test_result(self.username, "Memoria", float(nivel))
 
     def actualiza_punt_velocitat(self, t: float, num_errors: int):
+        
         # Score final pot ser temps + penalització
         score_final = t + (num_errors * 2)
         self.test_results["Velocitat"].append(score_final)
         db.save_test_result(self.username, "Velocitat", score_final)
 
     def registrar_checkin(self, face: int):
+        """Registra un nou check-in diari a la DB."""
         avui = datetime.now().strftime("%Y-%m-%d")
         self.daily_check_in[avui] = face
         db.save_daily_checkin(self.username, face)
 
     def registrar_incidencia(self, incidencia_id: int):
+        """Registra una nova incidència a la DB."""
         db.save_incidency(self.username, incidencia_id)
         
     def registrar_log(self, text: str):
+        """Registra una nova entrada de diari a la DB."""
         db.save_log(self.username, text)
     
     def registrar_login(self):

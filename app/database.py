@@ -127,7 +127,7 @@ def get_test_history(username, test_type) -> list[float]| None:
     """Retorna llista de puntuacions d'un test específic ordenades per data."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT score FROM test_results WHERE username = ? AND test_type = ? ORDER BY date ASC', 
+    c.execute('SELECT score FROM test_results WHERE username = ? AND test_type = ? ORDER BY date DESC', 
               (username, test_type))
     data = c.fetchall()
     conn.close()
@@ -154,7 +154,7 @@ def get_logs(username) -> list[tuple[str, str]]|None:
     """Retorna llista de logs (date, text) de l'usuari."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT date, text FROM logs WHERE username = ? ORDER BY date ASC', (username,))
+    c.execute('SELECT date, text FROM logs WHERE username = ? ORDER BY date DESC', (username,))
     data = c.fetchall()
     conn.close()
     return data

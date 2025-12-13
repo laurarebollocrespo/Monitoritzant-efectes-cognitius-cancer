@@ -7,7 +7,34 @@ from streamlit_image_coordinates import streamlit_image_coordinates
 if 'user' not in st.session_state:
     st.switch_page("app/login.py")
 
+# Inicialitzar estat dels jocs si no existeix (per seguretat)
+if 'games_played' not in st.session_state:
+    # Indexs: 0:Fluencia, 1:Atencio, 2:Memoria, 3:Velocitat
+    st.session_state.games_played = [False, False, False, False]
 user = st.session_state.user
+
+
+def get_dynamic_brain_image(games_state):
+    """
+    Converteix l'estat [True, False, True, False] en el nom del fitxer "brain_1010.png"
+    """
+    # Convertim booleans a string binari (ex: "1010")
+    binary_suffix = "".join(["1" if game else "0" for game in games_state])
+    
+    # Ruta esperada
+    expected_path = f"images/brain_states/brain_{binary_suffix}.png"
+    
+    # FALLBACK: Si la imatge exacta no existeix (per si no heu tingut temps de fer les 16),
+    # mostrem la imatge totalment acolorida o la totalment grisa com a seguretat.
+    if os.path.exists(expected_path):
+        return expected_path
+    else:
+        # Si han jugat alguna cosa, mostrem el full color, sino el gris.
+        if any(games_state):
+             return "images/brain_areas.png" # La imatge original (tota color)
+        else:
+             return "images/brain_states/brain_0000.png" # Assegura't de tenir almenys la 0000 feta!
+        
 
 # --- CARREGAR IMATGES ---
 def get_base64_image(image_path):
@@ -19,7 +46,7 @@ def get_base64_image(image_path):
 
 # Rutes a les imatges (des de l'arrel on s'executa main.py)
 LOGO_B64 = get_base64_image("images/logo.png")
-BRAIN_PATH = "images/brain_areas.png"
+BRAIN_B64 = get_base64_image(get_dynamic_brain_image(st.session_state.games_played))
 
 # --- CSS PERSONALITZAT (ESTIL EXACTE REFERÈNCIA) ---
 st.markdown(f"""
@@ -129,16 +156,6 @@ st.markdown(f"""
         margin: 0 auto;
     }}
     </style>
-
-    <div class="custom-header">
-        <div>
-            <img src="data:image/png;base64,{LOGO_B64}" class="logo-img">
-        </div>
-        <div class="header-right">
-            <span>{user.username}</span>
-            <span class="logout-text">Sortir ⏻</span> 
-        </div>
-    </div>
 """, unsafe_allow_html=True)
 
 # --- ZONA BENVINGUDA ---
