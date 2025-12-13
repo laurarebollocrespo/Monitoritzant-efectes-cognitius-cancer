@@ -20,9 +20,11 @@ def init_db() -> None:
             password TEXT NOT NULL,
             name TEXT,
             last_login DATE DEFAULT CURRENT_DATE,
-            streak INTEGER DEFAULT 1 
+            streak INTEGER DEFAULT 1,
+            admin BOOL DEFAULT 0 
         )
     ''')
+
     # TAULA: login_history
     c.execute('''
         CREATE TABLE IF NOT EXISTS login_history (
@@ -80,7 +82,7 @@ def init_db() -> None:
     conn.commit()
     conn.close()
 
-def create_user(username, password, name) -> bool:
+def create_user(username, password, name, admin=0) -> bool:
     """Crea un nou usuari amb la contrasenya hashada (seguretat bàsica)."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -89,8 +91,8 @@ def create_user(username, password, name) -> bool:
     hashed_pw = hashlib.sha256(password.encode()).hexdigest()
     
     try:
-        c.execute('INSERT INTO users (username, password, name) VALUES (?, ?, ?)', 
-                  (username, hashed_pw, name))
+        c.execute('INSERT INTO users (username, password, name, admin) VALUES (?, ?, ?, ?)', 
+                  (username, hashed_pw, name, admin))
         conn.commit()
         return True
     except sqlite3.IntegrityError:
@@ -108,17 +110,27 @@ def check_login(username, password) -> type_user | None:
     c.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, hashed_pw))
     data = c.fetchone()
     conn.close()
-    
+    print(data)
     return data # Retorna None si no el troba
 
 
 # --- getters ---
 
-def get_user_info(username) -> tuple[str, int, str] | None:
-    """Retorna (name, streak, last_login) de l'usuari."""
+def get_all_patients() -> list[tuple[str, str]]:
+    """Retorna llista de tots els usuaris que NO són admins (username, name)."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT name, streak, last_login FROM users WHERE username = ?', (username,))
+    # Seleccionem usuaris on admin és 0 o False
+    c.execute('SELECT username, name FROM users WHERE admin = 0')
+    data = c.fetchall()
+    conn.close()
+    return data
+
+def get_user_info(username) -> tuple[str, int, str, bool] | None:
+    """Retorna (name, streak, last_login, admin) de l'usuari."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT name, streak, last_login, admin FROM users WHERE username = ?', (username,))
     data = c.fetchone()
     conn.close()
     return data
@@ -127,7 +139,7 @@ def get_test_history(username, test_type) -> list[float]| None:
     """Retorna llista de puntuacions d'un test específic ordenades per data."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT score FROM test_results WHERE username = ? AND test_type = ? ORDER BY date ASC', 
+    c.execute('SELECT score FROM test_results WHERE username = ? AND test_type = ? ORDER BY date DESC', 
               (username, test_type))
     data = c.fetchall()
     conn.close()
@@ -154,7 +166,7 @@ def get_logs(username) -> list[tuple[str, str]]|None:
     """Retorna llista de logs (date, text) de l'usuari."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT date, text FROM logs WHERE username = ? ORDER BY date ASC', (username,))
+    c.execute('SELECT date, text FROM logs WHERE username = ? ORDER BY date DESC', (username,))
     data = c.fetchall()
     conn.close()
     return data
@@ -208,5 +220,6 @@ if __name__ == "__main__":
     init_db()
     if create_user("pacient", "1234", "Joan Garcia"): # Usuari de prova
         print("Usuari 'pacient' creat correctament.")
+        create_user("admin", "1234", "Administrador", admin=1) # Usuari admin de prova
     else:
         print("L'usuari ja existeix.")
