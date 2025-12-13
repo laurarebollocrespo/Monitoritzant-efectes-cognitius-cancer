@@ -31,6 +31,7 @@ class User:
             self.name = "Unknown"
             self.streak = 0
             self.last_login = None
+            
         if user_info:
             self.name = user_info[0]
             self.streak = user_info[1] if user_info[1] is not None else 0
@@ -78,7 +79,6 @@ class User:
             self.streak = 1
             self.last_login = today_str
             db.update_streak(self.username, self.streak)
-            db.add_login_history(self.username)
             return
 
         # Convertir string last_login a objecte date
@@ -101,13 +101,11 @@ class User:
             self.streak += 1
             self.last_login = today_str
             db.update_streak(self.username, self.streak)
-            db.add_login_history(self.username)
         else:
             # Ha passat més d'un dia, resetegem ratxa
             self.streak = 1
             self.last_login = today_str
             db.update_streak(self.username, self.streak)
-            db.add_login_history(self.username)
 
     # --- MÈTODES D'ACTUALITZACIÓ ---
 

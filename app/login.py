@@ -131,7 +131,8 @@ with col2:
     # Button
     if st.button("Entrar"):
         user_data = db.check_login(username, password)
-
+        print('User data:', user_data)
+        
         if user_data:
             st.session_state.logged_in = True
             st.session_state.games_played = [False]*4  # Reset games played
