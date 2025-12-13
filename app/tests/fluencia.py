@@ -59,11 +59,12 @@ with open("noms-fdic.txt", "r", encoding="utf-8") as f:
             all_words_list.append(word.lower())  # para get_close_matches
 
 TEST_DURATION = 60
+
 # -----------------------------
 # Configuración OpenAI
 # -----------------------------
-api_key = "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"
-client = openai.OpenAI(api_key=api_key)
+API_KEY = "INSERTE_AQUI_API_KEY"
+client = openai.OpenAI(api_key=API_KEY)
 
 # -----------------------------
 # Validaciones
