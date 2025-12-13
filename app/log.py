@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 import sys
 import os
-import database as db
+
 # --- GESTIÓ DE SESSIÓ ---
 if 'user' not in st.session_state:
     st.warning("No s'ha trobat l'usuari. Torna a fer login.")
@@ -13,7 +13,6 @@ user = st.session_state.user
 
 # Importem la DB per llegir l'historial (ja que user.py només té el mètode de guardar)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app import database as db
 
 # --- CSS PERSONALITZAT ---
 st.markdown("""
@@ -64,10 +63,8 @@ with st.container():
     with col1:
         if st.button("Guardar Entrada", type="primary", use_container_width=True):
             if nou_text.strip():
-                # Guardar mitjançant l'objecte User -> DB
                 user.registrar_log(nou_text)
                 st.success("Guardat al teu diari!")
-                time.sleep(1)
                 st.rerun() # Recarregar per mostrar-ho a l'historial a sota
             else:
                 st.warning("El diari està buit.")
@@ -77,8 +74,7 @@ st.divider()
 # --- HISTORIAL D'ENTRADES ---
 st.subheader("📖 Entrades Anteriors")
 
-
-logs = db.get_logs(user.username)
+logs = user.logs
 
 if logs:
     for data, text in logs:

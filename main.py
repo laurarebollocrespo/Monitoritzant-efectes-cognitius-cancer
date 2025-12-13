@@ -28,16 +28,14 @@ st.set_page_config(
 # --- INICIALITZACIÓ ---
 db.init_db() # Crea taules si no existeixen
 
-# Assegurar que hi ha un usuari de prova (Opcional, però útil per testejar ràpid)
-if not db.check_login("admin", "1234"):
-    db.create_user("admin", "1234", "Administrador")
-
+#--- GESTIÓ SESSIÓ ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 # --- DEFINICIÓ PÀGINES ---
 login_page = st.Page("app/login.py", title="Accés")
 home_page = st.Page("app/homepage.py", title="Inici")
+admin_home_page = st.Page("app/homepage_admin.py", title="Panell Mèdic")
 
 # TESTS
 test_fluencia = st.Page("app/tests/fluencia.py", title="Fluència Verbal")
@@ -52,6 +50,7 @@ log_page = st.Page("app/log.py", title="Diari")
 stats_page = st.Page("app/stats.py", title="Estadístiques")
 eines_page = st.Page("app/eines.py", title="Recursos")
 
+
 # --- NAVEGACIÓ ---
 if st.session_state.logged_in:
     # Sidebar amb botó de sortir
@@ -65,13 +64,21 @@ if st.session_state.logged_in:
             st.session_state.user = None
             st.rerun()
 
-    # Menú Principal
-    pg = st.navigation({
-        "Principal": [home_page],
-        "Tests Cognitius": [test_fluencia, test_atencio, test_memoria, test_velocitat],
-        "El meu Seguiment": [checkin_page, stats_page, log_page, incidencies_page],
-        "Eines": [eines_page]
-    })
+    if user and user.is_admin:
+        # --- MENÚ DE METGE ---
+        pg = st.navigation({
+            "Admin": [admin_home_page]
+        })
+
+    else:
+        # Menú PACIENT
+        pg = st.navigation({
+            "Principal": [home_page],
+            "Tests Cognitius": [test_fluencia, test_atencio, test_memoria, test_velocitat],
+            "El meu Seguiment": [checkin_page, stats_page, log_page, incidencies_page],
+            "Eines": [eines_page]
+        })
+
 else:
     # Només Login
     pg = st.navigation([login_page])
