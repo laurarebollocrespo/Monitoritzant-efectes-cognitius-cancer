@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
-# import user
+from user.py import User
 
 # Asignación de valores del usuario y constantes
 
@@ -14,8 +14,8 @@ IDS:dict[int, list[str]] = {
     }
 CAPTIONS:dict[int, list[str]] = {
     0: ["La congición y sus funciones", "Déficits cognitivos y cáncer", "Déficits cognitivos en el día a día"],
-    1: ['Mindfulness', 'Preparación para la pràctica', 'Postura', 'Amabilidad ante fallos cognitivos', 'Aceptación ante los fallos cognitivos'],
-    2: ['Mindfulness', 'Preparación para la pràctica', 'Postura', 'Amabilidad ante fallos cognitivos', 'Aceptación ante los fallos cognitivos'],
+    1: ['Mindfulness', 'Preparación para la práctica', 'Postura', 'Amabilidad ante fallos cognitivos', 'Aceptación ante los fallos cognitivos'],
+    2: ['Mindfulness', 'Preparación para la práctica', 'Postura', 'Amabilidad ante fallos cognitivos', 'Aceptación ante los fallos cognitivos'],
     3: ['Estimulación', 'Estrategias de compensación', 'Uso de agenda'],
     4: ['Estimulación', 'Estrategias de compensación']
 }
@@ -102,25 +102,70 @@ def deficit_materiel(defic:int, ids:dict[int, list[str]], captions:dict[int, lis
 
     st.divider()
 
+def ponder(user: User) -> list[int]:
+    """Valora las deficiencias cognitivas del usuario basándose en los últimos tests"""
+    # Define thresholds (adjust based on your test scoring)
+    # These are example thresholds - you'll need to calibrate them
+    THRESHOLDS = {
+        'Fluencia': {'severe': 40, 'moderate': 55, 'mild': 70},
+        'Atencio': {'severe': 35, 'moderate': 50, 'mild': 65},
+        'Memoria': {'severe': 30, 'moderate': 45, 'mild': 60},
+        'Velocitat': {'severe': 25, 'moderate': 40, 'mild': 55}
+    }
+    
+    deficits = []
+    test_types = ['Fluencia', 'Atencio', 'Memoria', 'Velocitat']
+    
+    for test_type in test_types:
+        results = user.test_results.get(test_type, [])
+        
+        if not results:
+            deficits.append(0)  # No data
+            continue
+        
+        # Use last 5-10 results
+        recent_results = results[-10:] if len(results) >= 10 else results
+        
+        # Calculate average of recent results
+        avg_score = sum(recent_results) / len(recent_results)
+        thresholds = THRESHOLDS[test_type]
+        
+        # Determine deficit level
+        if avg_score < thresholds['severe']:
+            deficits.append(3)  # Severe deficit
+        elif avg_score < thresholds['moderate']:
+            deficits.append(2)  # Moderate deficit
+        elif avg_score < thresholds['mild']:
+            deficits.append(1)  # Mild deficit
+        else:
+            deficits.append(0)  # Within normal range
+    
+    return deficits
 
-def main()->None:
+def master(user:User)->None:
+    """Inicializa la página y valora los déficits del usuario"""
+    deficits = ponder(user)
+
     ids = IDS
     captions = CAPTIONS
-
-    deficits:list[int] = [1]
-        ## Establecer los déficits del usuario [lista 1-4] 1-4 fluencia - atención - memoria de trabajo - velocidad
-
 
     st.title("Finestra d'eines")
 
     st.header("En aquesta finestra podràs accedir a eines que t'ajudaran a entendre i millorar la teva condició")
 
-
     if deficits: # comprobar la presencia de problemas cognitivos
         deficit_materiel(0, ids, captions)
         for defic in deficits:
             deficit_materiel(defic, ids, captions)
-
+    else:
+        st.subheader("Tot en orde!")
+        st.write("Enhorabona! Les teves respostes indiquen que actualment no presentes problemes cognitius, és important però mantenir un estil de vida saludable per ajudar a prevenir-ho, t'animem a:")
+        st.markdown("* Fer esport")
+        st.markdown("* Cuidar l'alimentació")
+        st.markdown("* Aprendre coses noves")
+        st.markdown("* Sociabilitzar")
+        st.markdown("* Fer Mindfulness")
 
 if __name__ == '__main__':
-    main()
+    user = User('pe', 'pito', 0, 'ahir', {}, {})
+    master(user)
