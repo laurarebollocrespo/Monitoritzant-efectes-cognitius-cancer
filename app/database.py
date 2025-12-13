@@ -1,13 +1,16 @@
 import sqlite3
 import hashlib
+import os
 
-DB_NAME = "oncoconnect.db"
 type_user = tuple[str, str, str, str, int]  # username, password, name, last_login, strike
 
+# Assegurem que la DB es crea a la carpeta arrel del projecte, no dins d'app/
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "onco_connect.db")
 
 def init_db() -> None:
     """Inicialitza la base de dades si no existeix."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     # TAULA: users
@@ -16,7 +19,7 @@ def init_db() -> None:
             username TEXT PRIMARY KEY,
             password TEXT NOT NULL,
             name TEXT,
-            last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_login DATE DEFAULT CURRENT_DATE,
             streak INTEGER DEFAULT 0 
         )
     ''')
@@ -79,7 +82,7 @@ def init_db() -> None:
 
 def create_user(username, password, name) -> bool:
     """Crea un nou usuari amb la contrasenya hashada (seguretat bàsica)."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     # Hash password per seguretat (fins i tot en hackathons queda bé fer-ho)
@@ -97,7 +100,7 @@ def create_user(username, password, name) -> bool:
 
 def check_login(username, password) -> type_user | None:
     """Verifica si l'usuari i contrasenya són correctes."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     hashed_pw = hashlib.sha256(password.encode()).hexdigest()
@@ -110,9 +113,48 @@ def check_login(username, password) -> type_user | None:
 
 def add_login_history(username) -> None:
     """Afegeix una entrada a l'historial de logins."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('INSERT INTO login_history (username) VALUES (?)', (username,))
+    conn.commit()
+    conn.close()
+
+
+# --- getters ---
+
+def get_user_info(username) -> tuple[str, int, str] | None:
+    """Retorna (name, streak, last_login) de l'usuari."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT name, streak, last_login FROM users WHERE username = ?', (username,))
+    data = c.fetchone()
+    conn.close()
+    return data
+
+def get_test_history(username, test_type) -> list[float]:
+    """Retorna llista de puntuacions d'un test específic ordenades per data."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT score FROM test_results WHERE username = ? AND test_type = ? ORDER BY date ASC', 
+              (username, test_type))
+    data = c.fetchall()
+    conn.close()
+    return [x[0] for x in data] # Convertir llista de tuples a llista plana
+
+def get_checkin_history(username) -> dict[str, int]:
+    """Retorna dict {data: face}."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT date, face FROM daily_checkin WHERE username = ?', (username,))
+    data = c.fetchall()
+    conn.close()
+    return {x[0]: x[1] for x in data}
+
+def update_streak(username, new_streak) -> None:
+    """Actualitza la ratxa a la DB."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('UPDATE users SET streak = ? WHERE username = ?', (new_streak, username))
     conn.commit()
     conn.close()
 
@@ -120,7 +162,7 @@ def add_login_history(username) -> None:
 
 def save_test_result(username, test_type, score)-> None:
     """Guarda la puntuació d'un test."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('INSERT INTO test_results (username, test_type, score) VALUES (?, ?, ?)',
               (username, test_type, score))
@@ -129,7 +171,7 @@ def save_test_result(username, test_type, score)-> None:
 
 def save_daily_checkin(username, face)-> None:
     """Guarda com se sent avui."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('INSERT INTO daily_checkin (username, face) VALUES (?, ?)',
               (username, face))
@@ -138,7 +180,7 @@ def save_daily_checkin(username, face)-> None:
 
 def save_incidency(username, incidencia)-> None:
     """Guarda una incidència reportada."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('INSERT INTO incidencies (username, incidencia) VALUES (?, ?)',
               (username, incidencia))
@@ -147,7 +189,7 @@ def save_incidency(username, incidencia)-> None:
 
 def save_log(username, text)-> None:
     """Guarda un log de text."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('INSERT INTO logs (username, text) VALUES (?, ?)',
               (username, text))
