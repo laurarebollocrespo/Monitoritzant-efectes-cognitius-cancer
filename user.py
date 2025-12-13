@@ -36,7 +36,7 @@ class User:
 
     def actualiza_punt_velocitat(self, t: float, num_erorrs: int):
         """parules: numero de palabras dichas en el test"""
-        self.test_results["Memoria"].append((t, num_erorrs))
+        self.test_results["velocitat"].append((t, num_erorrs))
     
 
     
