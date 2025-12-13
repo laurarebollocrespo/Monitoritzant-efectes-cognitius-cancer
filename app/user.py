@@ -31,7 +31,7 @@ class User:
             self.name = "Unknown"
             self.streak = 0
             self.last_login = None
-            
+
         if user_info:
             self.name = user_info[0]
             self.streak = user_info[1] if user_info[1] is not None else 0
@@ -66,14 +66,14 @@ class User:
             self.logs = db.get_logs(username)
 
         self.registrar_login()
-           
+        self.actualitza_last_login()
         
 
     def _calculate_streak(self):
         """Calcula la ratxa basant-se en l'última connexió."""
         today_date = datetime.now().date()
         today_str = today_date.strftime("%Y-%m-%d")
-
+        print(today_date)
         # Si és la primera vegada o no hi ha data
         if not self.last_login:
             self.streak = 1
@@ -90,15 +90,18 @@ class User:
             self.last_login = today_str
             db.update_streak(self.username, self.streak)
             return
+        
+        print("Last login date:", last_login_date)
 
         delta = (today_date - last_login_date).days
-
+        print("Days since last login (delta):", delta)
         if delta == 0:
             # Ja s'ha connectat avui, no fem res
             pass
         elif delta == 1:
             # Es va connectar ahir, sumem ratxa!
             self.streak += 1
+            print('Streak updated')
             self.last_login = today_str
             db.update_streak(self.username, self.streak)
         else:
@@ -145,3 +148,7 @@ class User:
     def registrar_login(self):
         """Registra un nou login a la DB."""
         db.add_login_history(self.username)
+    
+    def actualitza_last_login(self):
+        """Actualitza la data de l'últim login a avui."""
+        db.save_last_login(self.username)

@@ -216,6 +216,14 @@ def save_log(username, text)-> None:
     conn.commit()
     conn.close()
 
+def save_last_login(username)-> None:
+    """Actualitza la data de l'últim login a avui."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('UPDATE users SET last_login = CURRENT_DATE WHERE username = ?', (username,))
+    conn.commit()
+    conn.close()
+
 if __name__ == "__main__":
     init_db()
     if create_user("pacient", "1234", "Joan Garcia"): # Usuari de prova
