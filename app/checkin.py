@@ -71,7 +71,7 @@ st.markdown("""
 
 # --- LÒGICA PRINCIPAL ---
 avui = datetime.now().strftime("%Y-%m-%d")
-valor_anterior = user.daily_check_in.get(avui)
+valor_anterior = user.daily_check_in.get(avui, None)
 
 cares = {
     1: (FACE1, "Molt boirós / Lent"),
@@ -81,6 +81,7 @@ cares = {
     5: (FACE5, "Molt clar i àgil")
 }
 
+print("Valor anterior check-in:", valor_anterior)
 # -----------------------------------------------
 # CAS 1: JA HA REGISTRAT AVUI (Targeta única)
 # -----------------------------------------------
