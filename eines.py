@@ -2,7 +2,25 @@ import streamlit as st
 import streamlit.components.v1 as components
 # import user
 
+# Asignación de valores del usuario y constantes
 
+IDS:dict[int, list[str]] = {
+        0: ['hcBaJisV1Wo', 'sB6u7ZhNrHk', '24P5B6L0IgQ'],
+        1: ['B_M8eFq2GCA', '_5HCl5CDA94', 'fXDHm8PP6qo', 'OlyIT2zIimw', 'zXqljYzFb3w'],
+        2: ['B_M8eFq2GCA', '_5HCl5CDA94', 'fXDHm8PP6qo', 'OlyIT2zIimw', 'zXqljYzFb3w'],
+        3: ['RExO6edCQYk', 'FJIy-R3Gze4', 'iGTnb1YeRNw'],
+        4: ['RExO6edCQYk', 'FJIy-R3Gze4']
+       
+    }
+CAPTIONS:dict[int, list[str]] = {
+    0: ["La congición y sus funciones", "Déficits cognitivos y cáncer", "Déficits cognitivos en el día a día"],
+    1: ['Mindfulness', 'Preparación para la pràctica', 'Postura', 'Amabilidad ante fallos cognitivos', 'Aceptación ante los fallos cognitivos'],
+    2: ['Mindfulness', 'Preparación para la pràctica', 'Postura', 'Amabilidad ante fallos cognitivos', 'Aceptación ante los fallos cognitivos'],
+    3: ['Estimulación', 'Estrategias de compensación', 'Uso de agenda'],
+    4: ['Estimulación', 'Estrategias de compensación']
+}
+
+# funciones para la página
 def embed_youtube(video_id:str, width_percent=100)->str:
     """Enventana un video de youtube a partir de su id"""
     # Calculate height based on 16:9 aspect ratio
@@ -86,22 +104,9 @@ def deficit_materiel(defic:int, ids:dict[int, list[str]], captions:dict[int, lis
 
 
 def main()->None:
-    ids:dict[int, list[str]] = {
-        0: ['hcBaJisV1Wo', 'sB6u7ZhNrHk', '24P5B6L0IgQ'],
-        1: ['B_M8eFq2GCA', '_5HCl5CDA94', 'fXDHm8PP6qo', 'OlyIT2zIimw', 'zXqljYzFb3w'],
-        2: ['B_M8eFq2GCA', '_5HCl5CDA94', 'fXDHm8PP6qo', 'OlyIT2zIimw', 'zXqljYzFb3w'],
-        3: ['RExO6edCQYk', 'FJIy-R3Gze4', 'iGTnb1YeRNw'],
-        4: ['RExO6edCQYk', 'FJIy-R3Gze4']
-       
-    }
-    captions:dict[int, list[str]] = {
-        0: ["La congición y sus funciones", "Déficits cognitivos y cáncer", "Déficits cognitivos en el día a día"],
-        1: ['Mindfulness', 'Preparación para la pràctica', 'Postura', 'Amabilidad ante fallos cognitivos', 'Aceptación ante los fallos cognitivos'],
-        2: ['Mindfulness', 'Preparación para la pràctica', 'Postura', 'Amabilidad ante fallos cognitivos', 'Aceptación ante los fallos cognitivos'],
-        3: ['Estimulación', 'Estrategias de compensación', 'Uso de agenda'],
-        4: ['Estimulación', 'Estrategias de compensación']
-    }
-    
+    ids = IDS
+    captions = CAPTIONS
+
     deficits:list[int] = [1]
         ## Establecer los déficits del usuario [lista 1-4] 1-4 fluencia - atención - memoria de trabajo - velocidad
 
