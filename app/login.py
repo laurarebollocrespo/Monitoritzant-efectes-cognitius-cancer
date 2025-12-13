@@ -4,9 +4,6 @@ import base64
 from app.user import User
 from app import database as db
 
-# --- PAGE CONFIG ---
-st.set_page_config(page_title="OncoConnect", layout="wide")
-
 # --- UTILS ---
 def get_base64_of_bin_file(bin_file):
     try:
