@@ -1,11 +1,11 @@
-# fitxer: app.py
+from pathlib import Path
 import streamlit as st
 import sqlite3
 import matplotlib.pyplot as plt
 
 # Connexió a la base de dades
-DB_PATH = "onco_connect.db"
-conn = sqlite3.connect(DB_PATH)
+DB_PATH = Path(__file__).resolve().parent / "onco_connect.db"
+conn = sqlite3.connect(str(DB_PATH))
 c = conn.cursor()
 
 st.title("Evolució dels tests del pacient")
