@@ -5,6 +5,95 @@ from difflib import get_close_matches
 import openai
 import threading
 import os 
+import pyaudio
+from vosk import Model, KaldiRecognizer
+from queue import Queue
+from threading import Thread
+import speech_recognition as sr  # Alternativa para simplificar
+
+# -----------------------------
+# Configuración de reconocimiento de voz
+# -----------------------------
+
+class VoiceRecognition:
+    def __init__(self, model_path=os.path.join(os.path.dirname(__file__), "model/vosk-model-small-ca-0.4")):
+        self.model_path = model_path
+        self.recognizer = None
+        self.audio_queue = Queue()
+        self.is_listening = False
+        self.current_transcription = ""
+        self.last_word = ""
+        
+    def initialize_model(self):
+        """Inicializa el modelo de reconocimiento"""
+        try:
+            self.model = Model(self.model_path)
+            self.recognizer = KaldiRecognizer(self.model, 16000)
+            self.recognizer.SetWords(True)
+            return True
+        except Exception as e:
+            st.error(f"Error inicializando modelo: {e}")
+            return False
+    
+    def listen_microphone(self):
+        """Escucha el micrófono y transcribe en tiempo real"""
+        p = pyaudio.PyAudio()
+        stream = p.open(
+            format=pyaudio.paInt16,
+            channels=1,
+            rate=16000,
+            input=True,
+            frames_per_buffer=4000
+        )
+        
+        self.is_listening = True
+        
+        try:
+            while self.is_listening:
+                data = stream.read(2000, exception_on_overflow=False)
+                
+                if self.recognizer.AcceptWaveform(data):
+                    result = json.loads(self.recognizer.Result())
+                    if 'text' in result and result['text']:
+                        new_text = result['text'].strip()
+                        if new_text:
+                            # Extraer la última palabra
+                            words = new_text.split()
+                            if words:
+                                last_word = words[-1].lower()
+                                # Solo enviar si es diferente a la última palabra detectada
+                                if last_word != self.last_word and len(last_word) > 2:
+                                    self.last_word = last_word
+                                    self.current_transcription = last_word
+                                    # Poner en la cola para procesar
+                                    self.audio_queue.put(last_word)
+                else:
+                    # Procesamiento parcial para obtener texto en tiempo real
+                    partial = json.loads(self.recognizer.PartialResult())
+                    if 'partial' in partial and partial['partial']:
+                        partial_text = partial['partial'].strip()
+                        if partial_text:
+                            # Actualizar visualización en tiempo real
+                            st.session_state.partial_text = partial_text
+        except Exception as e:
+            st.error(f"Error en reconocimiento: {e}")
+        finally:
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+    
+    def start_listening(self):
+        """Inicia el reconocimiento en un hilo separado"""
+        if self.initialize_model():
+            thread = Thread(target=self.listen_microphone, daemon=True)
+            thread.start()
+            return True
+        return False
+    
+    def stop_listening(self):
+        """Detiene el reconocimiento"""
+        self.is_listening = False
+
 
 user = st.session_state.user
 
