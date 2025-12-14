@@ -1,9 +1,100 @@
+# fluencia.py
 import streamlit as st
 import random
 import time
 from difflib import get_close_matches
 import openai
 import threading
+import wave
+import json
+import numpy as np
+import pyaudio
+from vosk import Model, KaldiRecognizer
+from queue import Queue
+from threading import Thread, Event
+import speech_recognition as sr  # Alternativa para simplificar
+
+# -----------------------------
+# Configuración de reconocimiento de voz
+# -----------------------------
+class VoiceRecognition:
+    def __init__(self, model_path="model/vosk-model-small-es-0.42"):
+        self.model_path = model_path
+        self.recognizer = None
+        self.audio_queue = Queue()
+        self.is_listening = False
+        self.current_transcription = ""
+        self.last_word = ""
+        
+    def initialize_model(self):
+        """Inicializa el modelo de reconocimiento"""
+        try:
+            self.model = Model(self.model_path)
+            self.recognizer = KaldiRecognizer(self.model, 16000)
+            self.recognizer.SetWords(True)
+            return True
+        except Exception as e:
+            st.error(f"Error inicializando modelo: {e}")
+            return False
+    
+    def listen_microphone(self):
+        """Escucha el micrófono y transcribe en tiempo real"""
+        p = pyaudio.PyAudio()
+        stream = p.open(
+            format=pyaudio.paInt16,
+            channels=1,
+            rate=16000,
+            input=True,
+            frames_per_buffer=4000
+        )
+        
+        self.is_listening = True
+        
+        try:
+            while self.is_listening:
+                data = stream.read(2000, exception_on_overflow=False)
+                
+                if self.recognizer.AcceptWaveform(data):
+                    result = json.loads(self.recognizer.Result())
+                    if 'text' in result and result['text']:
+                        new_text = result['text'].strip()
+                        if new_text:
+                            # Extraer la última palabra
+                            words = new_text.split()
+                            if words:
+                                last_word = words[-1].lower()
+                                # Solo enviar si es diferente a la última palabra detectada
+                                if last_word != self.last_word and len(last_word) > 2:
+                                    self.last_word = last_word
+                                    self.current_transcription = last_word
+                                    # Poner en la cola para procesar
+                                    self.audio_queue.put(last_word)
+                else:
+                    # Procesamiento parcial para obtener texto en tiempo real
+                    partial = json.loads(self.recognizer.PartialResult())
+                    if 'partial' in partial and partial['partial']:
+                        partial_text = partial['partial'].strip()
+                        if partial_text:
+                            # Actualizar visualización en tiempo real
+                            st.session_state.partial_text = partial_text
+        except Exception as e:
+            st.error(f"Error en reconocimiento: {e}")
+        finally:
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+    
+    def start_listening(self):
+        """Inicia el reconocimiento en un hilo separado"""
+        if self.initialize_model():
+            thread = Thread(target=self.listen_microphone, daemon=True)
+            thread.start()
+            return True
+        return False
+    
+    def stop_listening(self):
+        """Detiene el reconocimiento"""
+        self.is_listening = False
 
 # -----------------------------
 # Dataset de palabras
@@ -35,7 +126,6 @@ fields = {
     ]
 }
 
-
 field_representatives = {
     "fruites": "fruita",
     "animals": "animal",
@@ -55,11 +145,12 @@ all_words_list = []
 with open("noms-fdic.txt", "r", encoding="utf-8") as f:
     for line in f:
         if line.strip():
-            word = line.split("=")[0].strip()  # tomamos la palabra antes del '='
+            word = line.split("=")[0].strip()
             all_words.add(word.lower())
-            all_words_list.append(word.lower())  # para get_close_matches
+            all_words_list.append(word.lower())
 
 TEST_DURATION = 60
+
 # -----------------------------
 # Configuración OpenAI
 # -----------------------------
@@ -82,7 +173,6 @@ def validar_letra(word, letter):
         return "correct"
 
     return "pending"
-
 
 def validar_campo(word, field):
     w = word.lower().strip()
@@ -114,7 +204,6 @@ def validar_campo_gpt(word, field, idx, pending_results):
     except Exception:
         result = "incorrect"
 
-    # ✅ NO tocamos st.session_state.words
     pending_results['state'] = result
 
 # -----------------------------
@@ -127,7 +216,7 @@ if "start_time" not in st.session_state:
     st.session_state.start_time = None
 
 if "words" not in st.session_state:
-    st.session_state.words = []  # {word, state}
+    st.session_state.words = []
 
 if "used_words" not in st.session_state:
     st.session_state.used_words = set()
@@ -144,6 +233,17 @@ if "current_field" not in st.session_state:
 if "last_tick" not in st.session_state:
     st.session_state.last_tick = time.time()
 
+if "voice_recognition" not in st.session_state:
+    st.session_state.voice_recognition = VoiceRecognition()
+
+if "is_listening" not in st.session_state:
+    st.session_state.is_listening = False
+
+if "partial_text" not in st.session_state:
+    st.session_state.partial_text = ""
+
+if "last_processed_word" not in st.session_state:
+    st.session_state.last_processed_word = ""
 
 # -----------------------------
 # Instrucciones
@@ -154,12 +254,45 @@ if st.session_state.screen == "instructions":
         "Escribe palabras alternando entre:\n"
         "- Palabras que empiecen por una letra\n"
         "- Palabras de un campo semántico\n\n"
-        "⏱️ Duración: 60 segundos"
+        "⏱️ Duración: 60 segundos\n\n"
+        "🔊 Ahora con reconocimiento de voz!"
     )
-    if st.button("Comenzar"):
-        st.session_state.start_time = time.time()
-        st.session_state.screen = "test"
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Comenzar"):
+            st.session_state.start_time = time.time()
+            st.session_state.screen = "test"
+            st.rerun()
+    
+    with col2:
+        if st.button("Probar micrófono"):
+            st.session_state.screen = "mic_test"
+            st.rerun()
+
+# -----------------------------
+# Prueba de micrófono
+# -----------------------------
+elif st.session_state.screen == "mic_test":
+    st.title("Prueba de micrófono")
+    
+    if st.button("Iniciar prueba"):
+        if st.session_state.voice_recognition.start_listening():
+            st.session_state.is_listening = True
+            st.success("Micrófono activado. Habla ahora...")
+    
+    if st.button("Detener prueba"):
+        st.session_state.voice_recognition.stop_listening()
+        st.session_state.is_listening = False
+        st.info("Micrófono detenido")
+    
+    if st.button("Volver a instrucciones"):
+        st.session_state.screen = "instructions"
         st.rerun()
+    
+    # Mostrar texto reconocido en tiempo real
+    if st.session_state.partial_text:
+        st.text_area("Texto reconocido:", st.session_state.partial_text, height=100)
 
 # -----------------------------
 # Test
@@ -170,7 +303,13 @@ elif st.session_state.screen == "test":
     time_left = max(TEST_DURATION - elapsed, 0)
 
     st.title("Test en curso")
-    st.progress(time_left / TEST_DURATION)
+    
+    # Barra de progreso y tiempo
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.progress(time_left / TEST_DURATION)
+    with col2:
+        st.metric("Tiempo restante", f"{int(time_left)}s")
 
     # Mostrar consigna
     if st.session_state.current_type == "letter":
@@ -178,31 +317,69 @@ elif st.session_state.screen == "test":
     else:
         st.subheader(f"Palabra del campo: **{st.session_state.current_field}**")
 
-    # Formulario de entrada
+    # Controles de voz
+    col_voice1, col_voice2 = st.columns(2)
+    with col_voice1:
+        if not st.session_state.is_listening:
+            if st.button("🎤 Activar voz", type="primary"):
+                if st.session_state.voice_recognition.start_listening():
+                    st.session_state.is_listening = True
+                    st.rerun()
+    with col_voice2:
+        if st.session_state.is_listening:
+            if st.button("⏹️ Detener voz", type="secondary"):
+                st.session_state.voice_recognition.stop_listening()
+                st.session_state.is_listening = False
+                st.rerun()
+
+    # Mostrar estado de voz
+    if st.session_state.is_listening:
+        st.info("🎤 Escuchando... Habla ahora")
+        # Mostrar texto parcial
+        if st.session_state.partial_text:
+            st.caption(f"Reconociendo: {st.session_state.partial_text}")
+    else:
+        st.warning("Micrófono desactivado - Usa entrada manual")
+
+    # Formulario de entrada manual (como respaldo)
     with st.form("fluencia_form", clear_on_submit=True):
-        word = st.text_input("Escribe una palabra")
-        submitted = st.form_submit_button("Enviar")
+        word = st.text_input("O escribe manualmente:")
+        submitted = st.form_submit_button("Enviar manualmente")
 
-    if submitted and word:
+    # Procesar entrada de voz
+    voice_word = None
+    if st.session_state.is_listening and not st.session_state.voice_recognition.audio_queue.empty():
+        voice_word = st.session_state.voice_recognition.audio_queue.get()
+    
+    # Procesar palabra (de voz o manual)
+    word_to_process = None
+    if voice_word:
+        word_to_process = voice_word
+        st.success(f"🎤 Palabra detectada: {voice_word}")
+    elif submitted and word:
+        word_to_process = word
+    
+    if word_to_process:
+        # Validar y procesar la palabra
         if st.session_state.current_type == "letter":
-            state = validar_letra(word, st.session_state.current_letter)
+            state = validar_letra(word_to_process, st.session_state.current_letter)
         else:
-            state = validar_campo(word, st.session_state.current_field)
+            state = validar_campo(word_to_process, st.session_state.current_field)
 
-        st.session_state.used_words.add(word.lower())
+        st.session_state.used_words.add(word_to_process.lower())
 
         idx = len(st.session_state.words)
         st.session_state.words.append({
-            "word": word,
+            "word": word_to_process,
             "state": state,
-            "field": st.session_state.current_field if st.session_state.current_type == "field" else None
+            "field": st.session_state.current_field if st.session_state.current_type == "field" else None,
+            "source": "voz" if voice_word else "manual"
         })
 
         if state == "pending" and st.session_state.current_type == "field":
-            # Validación en segundo plano con GPT
             thread = threading.Thread(
                 target=validar_campo_gpt,
-                args=(word, st.session_state.current_field, idx, st.session_state.words[idx]),
+                args=(word_to_process, st.session_state.current_field, idx, st.session_state.words[idx]),
                 daemon=True
             )
             thread.start()
@@ -212,7 +389,13 @@ elif st.session_state.screen == "test":
             "field" if st.session_state.current_type == "letter" else "letter"
         )
 
+        # Actualizar última palabra procesada
+        st.session_state.last_processed_word = word_to_process
+        
+        st.rerun()
+
     # Mostrar palabras con estado
+    st.subheader("Palabras ingresadas:")
     for w in st.session_state.words:
         color = {
             "correct": "lightgreen",
@@ -223,21 +406,27 @@ elif st.session_state.screen == "test":
         symbol = {
             "correct": "✅",
             "incorrect": "❌",
-        }[w["state"]]
+            "pending": "⏳"
+        }.get(w["state"], "⏳")
 
+        source_icon = "🎤" if w.get("source") == "voz" else "✍️"
+        
         st.markdown(
-            f"<div style='background:{color}; padding:6px; margin:4px'>"
-            f"{symbol} {w['word']}</div>",
+            f"<div style='background:{color}; padding:8px; margin:4px; border-radius:5px'>"
+            f"{symbol} {source_icon} {w['word']}</div>",
             unsafe_allow_html=True
         )
 
+    # Verificar si el test ha terminado
     all_processed = all(w["state"] != "pending" for w in st.session_state.words)
     if time_left <= 0 and all_processed:
+        st.session_state.voice_recognition.stop_listening()
+        st.session_state.is_listening = False
         st.session_state.screen = "results"
         st.rerun()
 
-    # Si no ha terminado, forzamos actualización cada segundo
-    time.sleep(1)
+    # Actualización automática
+    time.sleep(0.5)
     st.rerun()
 
 # -----------------------------
@@ -250,11 +439,23 @@ elif st.session_state.screen == "results":
     incorrect = sum(1 for w in st.session_state.words if w["state"] == "incorrect")
     pending = sum(1 for w in st.session_state.words if w["state"] == "pending")
 
-    st.write(f"✅ Correctas: {correct}")
-    st.write(f"❌ Incorrectas: {incorrect}")
-    st.write(f"⏳ Pendientes: {pending}")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("✅ Correctas", correct)
+    with col2:
+        st.metric("❌ Incorrectas", incorrect)
+    with col3:
+        st.metric("⏳ Pendientes", pending)
 
-    if st.button("Reiniciar"):
+    # Detalles por tipo de entrada
+    st.subheader("Detalles:")
+    voz_words = [w for w in st.session_state.words if w.get("source") == "voz"]
+    manual_words = [w for w in st.session_state.words if w.get("source") == "manual"]
+    
+    st.write(f"Palabras por voz: {len(voz_words)}")
+    st.write(f"Palabras manuales: {len(manual_words)}")
+
+    if st.button("Reiniciar test"):
         for k in list(st.session_state.keys()):
             del st.session_state[k]
         st.rerun()

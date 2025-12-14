@@ -177,10 +177,10 @@ col_brain, col_sep, col_actions = st.columns([1.5, 0.1, 1])
 with col_brain:
     st.write("") # Espai
     
-    if os.path.exists(BRAIN_PATH):
+    if os.path.exists(BRAIN_B64):
         # Renderitzar imatge i capturar click
         coords = streamlit_image_coordinates(
-            BRAIN_PATH,
+            BRAIN_B64,
             width=500, # Amplada fixa per calibrar bé els clicks
             key="brain_nav"
         )
@@ -206,7 +206,7 @@ with col_brain:
             elif x > 250 and y > 200:
                 st.switch_page("app/tests/velocitat.py")
     else:
-        st.error(f"No s'ha trobat la imatge: {BRAIN_PATH}. Assegura't que està a la carpeta images/")
+        st.error(f"No s'ha trobat la imatge: {BRAIN_B64}. Assegura't que està a la carpeta images/")
 
 # 2. SEPARADOR (CENTRE)
 with col_sep:
