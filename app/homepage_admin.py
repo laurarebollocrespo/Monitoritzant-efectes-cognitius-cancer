@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import database as db
 
 # --- VERIFICACIÓ DE SEGURETAT ---
-if 'user' not in st.session_state or not st.session_state.user.is_admin:
+if 'user' not in st.session_state or not st.session_state.user.admin:
     st.error("Accés denegat. Només per a personal mèdic.")
     st.stop()
 
@@ -116,4 +116,3 @@ if selected_label != "Selecciona un pacient...":
 
 else:
     st.info("Selecciona un pacient del menú superior per veure les seves dades.")
-    st.image("images/logo.png", width=100) # Decoració

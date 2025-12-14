@@ -6,7 +6,6 @@ NIVELL_FINAL = 10
 
 user = st.session_state.user
 
-
 def teclat_numeric_atencio():
     """Genera un teclat numèric per que l'usuari pugui escriure l'input."""
     if "input_atencio" not in st.session_state:

@@ -27,4 +27,4 @@ if last_test_played:
         pass # Si hi ha error de format, deixem passar
 
 # Executar el test
-test_fluencia.test_fluencia()
+test_fluencia.run_fluencia()
