@@ -1,0 +1,101 @@
+# OncoConnect
+
+Aplicació per al seguiment cognitiu i emocional de pacients oncològics, amb tests dissenyats per mesurar **atenció, memòria, velocitat de processament i fluència verbal alternada**. La idea és oferir un **seguiment intensiu** d'una setmana per monitoritzar l’estat cognitiu del pacient i correlacionar-ho amb la seva percepció subjectiva. A més a més es permet fer tests de control 1 cop cada 6 mesos.
+
+---
+
+## Tests Cognitius
+
+### 1. Fluència verbal alternada
+**Objectiu:** Evocar paraules que comencin per una lletra determinada alternant entre paraules d'un camp semàntic determinat.  
+
+**Desenvolupament:**
+- Instruccions clares al pacient.
+- Comprovació de cada paraula:
+  - Que sigui **alternada**.
+  - Que sigui **correcta segons Softcatalà**.
+  - Que pertanyi al **camp semàntic vàlid**.
+- **Entrada:** Paraules.
+- **Sortida:** Nombre de paraules correctes i puntuació.
+- **Durada:** 1 minut per completar.
+
+**Tractament:**
+- Mindfulness.
+- Recomanacions estàndard.
+
+---
+
+### 2. Atenció
+**Objectiu:** Repetir en el mateix ordre una sèrie de números proporcionats.  
+
+**Desenvolupament:**
+- Instruccions i consignes.
+- **Fi de la prova:** Quan s’arribi a la longitud màxima (9 números) o quan hi hagi 2 errors en la mateixa longitud.
+- **Entrada:** Sèries de números.
+- **Sortida:** Nivell final (4-10 (passa el test)).
+- **Durada:** 2 repeticions per longitud de números; longitud mínima 4, màxima 9.
+
+---
+
+### 3. Memòria de treball
+**Objectiu:** Repetir una sèrie de números en **ordre invers** al proporcionat.  
+
+**Desenvolupament:**
+- Comptar 2 errors per longitud.
+- Longituds: 4-8 números.
+- **Entrada:** Sèries de números (igual que en atenció).
+- **Sortida:** Nivell final (4-9 (passa el test)).
+- **Durada:** Fins a 2 repeticions per longitud de números; longitud mínima 4, màxima 8.
+
+---
+
+### 4. Velocitat de processament
+**Objectiu:** Prem el número que apareix a la pantalla **en ordre creixent** i el més ràpid possible.  
+
+**Desenvolupament:**
+- Instruccions mostrades a la pantalla abans de començar.
+- **Entrada:** Conjunt de números (10 números).
+- **Sortida:** Nombre d’errors i temps.
+- **Durada:** Fins que tots els números es premin en ordre correcte.
+
+---
+
+## Què m'ha passat avui?
+- Permet al pacient marcar entre 10 opcions, les incidències que li han passat durant el seu dia a dia.
+
+## Com em sento avui?
+- Permet fer un registre diari de com es troba anímicament el pacient
+
+## Diari
+- Permet al pacient tenir un espai propi per expressar-se lliurement.
+
+## Eines
+- Ofereix recursos i consells per treballar i millorar les 4 habilitats treballades als tests
+
+## Chat-Bot
+- Un espai per fer consultes a un bot o a diferents metges.
+
+## Estadístiques
+- Mostra 2 gràfics amb l'evolució del pacient als tests.
+- Mostra 1 gràfic amb l'evolució del pacient en l'estat anímic diari del pacient
+- Mostra 1 gràfic amb les incidències que ha tingut el pacient durant els "X" anteriors dies.
+
+## Admin
+- Permet accedir a l'aplicació com un administrador, per així diferenciar entre el mode pacient i tenir més privilegis.
+
+---
+
+## Dependències
+
+- Streamlit
+- 
+
+Per instal·lar les dependències:
+`pip install -r requirements.txt`
+
+## Crèdits
+
+Aquest projecte utilitza el fitxer `noms-fdic.txt` del projecte:
+[catalan-dict-tools](https://github.com/Softcatala/catalan-dict-tools/blob/master/diccionari-arrel/noms-fdic.txt):
+
+
