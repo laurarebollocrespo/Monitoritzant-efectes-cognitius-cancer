@@ -6,7 +6,7 @@ NIVELL_FINAL = 9  # mirar si es 9 u 8
 
 def score(lvl:int)->float:
     """Asigna un float de puntuación en función del nivel en el que se acaba el test"""
-
+    return (lvl-4)/5*100
 def test_memoria():
     st.title("Test de Memòria")
 

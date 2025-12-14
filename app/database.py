@@ -40,7 +40,7 @@ def init_db() -> None:
         CREATE TABLE IF NOT EXISTS test_results (
             username TEXT,
             test_type TEXT,
-            date DATE DEFAULT CURRENT_DATE,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             score REAL,
             PRIMARY KEY(username, test_type, date),
             FOREIGN KEY(username) REFERENCES users(username)

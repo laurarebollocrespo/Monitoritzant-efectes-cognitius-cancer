@@ -1,6 +1,4 @@
-import sys
-import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Importem database des del mateix paquet
 from app import database as db
@@ -113,13 +111,13 @@ class User:
         self.test_results["Fluencia"].append(paraules)
         db.save_test_result(self.username, "Fluencia", float(paraules))
 
-    def actualiza_punt_atencio(self, nivel: int):
-        self.test_results["Atencio"].append(nivel)
-        db.save_test_result(self.username, "Atencio", float(nivel))
+    def actualiza_punt_atencio(self, puntaje: float):
+        self.test_results["Atencio"].append(puntaje)
+        db.save_test_result(self.username, "Atencio", puntaje)
 
-    def actualiza_punt_memoria(self, nivel: int):
-        self.test_results["Memoria"].append(nivel)
-        db.save_test_result(self.username, "Memoria", float(nivel))
+    def actualiza_punt_memoria(self, puntaje: float):
+        self.test_results["Memoria"].append(puntaje)
+        db.save_test_result(self.username, "Memoria", puntaje)
 
     def actualiza_punt_velocitat(self, t: float, num_errors: int):
         
