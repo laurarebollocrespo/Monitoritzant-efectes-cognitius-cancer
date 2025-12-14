@@ -1,5 +1,5 @@
 import streamlit as st
-from bot import render_bot  # el teu bot real
+from app.bot import render_bot  # el teu bot real
 
 st.title("💬 Xats")
 

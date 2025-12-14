@@ -49,6 +49,7 @@ incidencies_page = st.Page("app/incidencies.py", title="Incidències")
 log_page = st.Page("app/log.py", title="Diari")
 stats_page = st.Page("app/stats.py", title="Estadístiques")
 eines_page = st.Page("app/eines.py", title="Recursos")
+xat_page = st.Page("app/chats.py", title="Xats")
 
 
 # --- NAVEGACIÓ ---
@@ -64,7 +65,7 @@ if st.session_state.logged_in:
             st.session_state.user = None
             st.rerun()
 
-    if user and user.is_admin:
+    if user and user.admin:
         # --- MENÚ DE METGE ---
         pg = st.navigation({
             "Admin": [admin_home_page]
@@ -76,7 +77,7 @@ if st.session_state.logged_in:
             "Principal": [home_page],
             "Tests Cognitius": [test_fluencia, test_atencio, test_memoria, test_velocitat],
             "El meu Seguiment": [checkin_page, stats_page, log_page, incidencies_page],
-            "Eines": [eines_page]
+            "Eines": [eines_page, xat_page]
         })
 
 else:

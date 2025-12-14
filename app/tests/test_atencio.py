@@ -6,37 +6,38 @@ NIVELL_FINAL = 10
 
 user = st.session_state.user
 
+
 def teclat_numeric_atencio():
     """Genera un teclat numèric per que l'usuari pugui escriure l'input."""
     if "input_atencio" not in st.session_state:
         st.session_state.input_atencio = []
+    if "submitted_atencio" not in st.session_state:
+        st.session_state.submitted_atencio = False
 
-    st.markdown("### Introdueix els números")
+    st.markdown("### Entrada actual: " + " ".join(st.session_state.input_atencio))
 
-    # Mostrar el que escriu l'usuari
-    st.text_input(
-        "Entrada",
-        " ".join(st.session_state.input_atencio),
-        disabled=True,
-        key="display_atencio",
-    )
-
-    cols = st.columns(3)
-    buttons = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "←", "0", "✔"]
-
+    buttons = ["1","2","3","4","5","6","7","8","9","←","0","✔"]
     submitted = False
 
-    for i, label in enumerate(buttons):
-        with cols[i % 3]:
-            if st.button(label, key=f"key_atencio_{label}_{i}"):
+    for row in range(4):
+        cols = st.columns(3, gap="small")
+        for col in range(3):
+            i = row * 3 + col
+            if i >= len(buttons):
+                continue
+            label = buttons[i]
+            if cols[col].button(label, key=f"key_atencio_{label}_{i}"):
                 if label.isdigit():
                     st.session_state.input_atencio.append(label)
                 elif label == "←" and st.session_state.input_atencio:
                     st.session_state.input_atencio.pop()
                 elif label == "✔":
-                    submitted = True
+                    st.session_state.submitted_atencio = True
 
-    return submitted
+    if st.session_state.submitted_atencio:
+        st.session_state.submitted_atencio = False
+        return True
+    return False
 
 
 def test_atencio():
@@ -104,12 +105,7 @@ def test_atencio():
                     user_nums = list(map(int, st.session_state.input_atencio))
                 except:
                     return
-
-            if submitted:
-                try:
-                    user_nums = list(map(int, user_input.split()))
-                except:
-                    return
+                st.session_state.input_atencio = []
 
                 st.session_state.user_number_str_atencio = " ".join(map(str, user_nums))
                 correct = user_nums == st.session_state.numbers_atencio

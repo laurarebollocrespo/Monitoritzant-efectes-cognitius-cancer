@@ -35,15 +35,15 @@ class User:
             self.streak = user_info[1] if user_info[1] is not None else 0
             self.last_login = user_info[2] # String YYYY-MM-DD
             # Capturem el flag d'admin (1 = True, 0 = False)
-            self.is_admin = True if user_info[3] else False
+            self.admin = True if user_info[3] else False
         else:
             self.name = "Unknown"
             self.streak = 0
             self.last_login = None
-            self.is_admin = False
+            self.admin = False
 
         # Si és admin, no cal calcular streak ni carregar tests seus
-        if not self.is_admin:
+        if not self.admin:
             self._calculate_streak()
             
             # Carregar dades només si és pacient
