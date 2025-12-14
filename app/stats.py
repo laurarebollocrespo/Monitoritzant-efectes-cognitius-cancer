@@ -77,7 +77,7 @@ st.header("Evolució de l'estat d'ànim del pacient")
 # Agafar dades de daily_checkin
 c.execute(
     "SELECT username, date, face FROM daily_checkin WHERE username=? ORDER BY date",
-    (pacient.name,),
+    (pacient.username,),
 )
 dades_checkin = c.fetchall()
 conn.close()
@@ -131,7 +131,7 @@ def graf_incidents(pacient_name, dies_enrere):
         GROUP BY incidencia
         ORDER BY incidencia
         """,
-        (pacient.name, data_min.strftime("%Y-%m-%d"), data_max.strftime("%Y-%m-%d")),
+        (pacient.username, data_min.strftime("%Y-%m-%d"), data_max.strftime("%Y-%m-%d")),
     )
     dades_incidencies = c.fetchall()
     conn.close()
