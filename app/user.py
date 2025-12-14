@@ -152,3 +152,7 @@ class User:
     def actualitza_last_login(self):
         """Actualitza la data de l'últim login a avui."""
         db.save_last_login(self.username)
+
+    def last_test_date(self, test_type: str) ->  str | None:
+        """Retorna la data de l'últim test realitzat d'un tipus, o None si no en té."""
+        return db.get_last_test(self.username, test_type)
