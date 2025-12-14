@@ -169,11 +169,11 @@ class User:
         for i, test in enumerate(["Fluencia", "Atencio", "Memoria", "Velocitat"]):
             last = self.last_test_date(test)
             if last:
-                last_date = datetime.strptime(last, "%Y-%m-%d").date()
+                last_date = datetime.strptime(last, "%Y-%m-%d %H:%M:%S").date()
                 today = datetime.now().date()
                 if (today - last_date).days < 180:
                     self.games_played[i] = 1
-    
+                    
     def mark_game_played(self, game_index: int):
         self.games_played[game_index] = 1
             
