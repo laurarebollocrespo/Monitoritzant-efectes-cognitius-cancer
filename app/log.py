@@ -52,7 +52,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- CAPÇALERA ---
-st.title("📔 El teu Diari Personal")
+st.title("El teu Diari Personal")
 st.write("Un espai segur per escriure com et sents, els teus dubtes o els teus èxits.")
 
 # --- ÀREA D'ESCRIPTURA ---
@@ -72,7 +72,7 @@ with st.container():
 st.divider()
 
 # --- HISTORIAL D'ENTRADES ---
-st.subheader("📖 Entrades Anteriors")
+st.subheader("Entrades Anteriors")
 
 logs = user.logs
 

@@ -54,7 +54,7 @@ st.markdown("""
 # --- INTERFÍCIE ---
 
 st.markdown("<div class='incidencia-card'>", unsafe_allow_html=True)
-st.title("💭 Què t'ha passat?")
+st.title("Què t'ha passat?")
 st.write("Selecciona totes les situacions que hagis viscut avui. Això ens ajuda a personalitzar el teu tractament.")
 
 st.write("") # Espai
@@ -86,7 +86,7 @@ if st.button("Registrar Incidències", use_container_width=True, type="primary")
         # 2. Feedback
         st.success(f"S'han registrat {len(seleccions)} incidències correctament.")
         
-        st.markdown("### 💡 Consells per a ara mateix:")
+        st.markdown("### Consells per a ara mateix:")
         
         for tipus in tipus_detectats:
             consell = CONSELLS.get(tipus, "Pren-t'ho amb calma.")

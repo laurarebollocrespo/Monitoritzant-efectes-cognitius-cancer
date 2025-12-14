@@ -1,3 +1,5 @@
+from pathlib import Path
+import sqlite3
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -13,14 +15,14 @@ if 'user' not in st.session_state or not st.session_state.user.admin:
     st.error("Accés denegat. Només per a personal mèdic.")
     st.stop()
 
-st.title(f"👨‍⚕️ Panell Mèdic: {st.session_state.user.name}")
+st.title(f"Panell Mèdic: {st.session_state.user.name}")
 st.markdown("---")
 
 # 1. SELECTOR DE PACIENT
 patients = db.get_all_patients() # Retorna [(user, nom), ...]
 patient_dict = {f"{p[1]} ({p[0]})": p[0] for p in patients}
 
-selected_label = st.selectbox("🔍 Buscar Pacient:", ["Selecciona un pacient..."] + list(patient_dict.keys()))
+selected_label = st.selectbox("Buscar Pacient:", ["Selecciona un pacient..."] + list(patient_dict.keys()))
 
 if selected_label != "Selecciona un pacient...":
     target_username = patient_dict[selected_label]
@@ -28,7 +30,7 @@ if selected_label != "Selecciona un pacient...":
     # Recuperar dades del pacient seleccionat
     # Nota: Podem usar les funcions get_... de database.py directament
     
-    tab_overview, tab_tests, tab_logs = st.tabs(["Visió General", "Tests Cognitius", "Diari i Incidències"])
+    tab_overview, tab_tests, tab_logs, tab_xat = st.tabs(["Visió General", "Tests Cognitius", "Diari i Incidències" , "Xats"])
     
     # --- TAB 1: VISIÓ GENERAL ---
     with tab_overview:
@@ -91,7 +93,7 @@ if selected_label != "Selecciona un pacient...":
         conn = db.sqlite3.connect(db.DB_PATH)
         
         with col_inc:
-            st.subheader("⚠️ Incidències Reportades")
+            st.subheader("Incidències Reportades")
             df_inc = pd.read_sql_query(f"SELECT date, incidencia FROM incidencies WHERE username='{target_username}' ORDER BY date DESC", conn)
             
             # Mapeig invers manual per mostrar text (idealment importar INCIDENCIES_MAP)
@@ -102,7 +104,7 @@ if selected_label != "Selecciona un pacient...":
                 st.write("Cap incidència.")
                 
         with col_diari:
-            st.subheader("📔 Entrades al Diari")
+            st.subheader("Entrades al Diari")
             df_log = pd.read_sql_query(f"SELECT date, text FROM logs WHERE username='{target_username}' ORDER BY date DESC", conn)
             
             if not df_log.empty:
@@ -113,6 +115,33 @@ if selected_label != "Selecciona un pacient...":
                 st.write("Diari buit.")
         
         conn.close()
+
+    with tab_xat:
+        st.subheader("Xats amb el Pacient")
+        # Connexió a la BD
+        REPO_PATH = Path(__file__).resolve().parent.parent
+        DB_PATH = REPO_PATH / "onco_connect.db"
+        conn = sqlite3.connect(str(DB_PATH))
+        c = conn.cursor()
+
+
+
+        ############################################
+        # Evolució tests objectius de cada pacient #
+        ############################################
+
+
+        # Llistar pacients
+        c.execute("SELECT username, name FROM users ORDER BY username")
+        pacients = c.fetchall()
+        pacient_dict = {f"{name} ({username})": username for username, name in pacients}
+
+        # Sel·lecciona pacient
+        seleccio = st.selectbox("Selecciona un pacient:", list(pacient_dict.keys()))
+        pacient = pacient_dict[seleccio]
+
+        st.header(f"Xats de {seleccio}")
+        st.write(f"No hi ha cap xat amb el pacient {pacient}")
 
 else:
     st.info("Selecciona un pacient del menú superior per veure les seves dades.")

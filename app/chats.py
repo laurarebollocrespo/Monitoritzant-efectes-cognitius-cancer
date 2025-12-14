@@ -1,7 +1,7 @@
 import streamlit as st
 from app.bot import render_bot  # el teu bot real
 
-st.title("💬 Xats")
+st.title("Xats")
 
 # -------------------------
 # Inicialització de xats amb professionals
@@ -22,16 +22,16 @@ if "professional_chats" not in st.session_state:
 chat_option = st.radio(
     "Selecciona una conversa",
     [
-        "🤖 OncoBot (assistent)",
-        "👨‍⚕️ Dr. Josep Maria (oncologia)",
-        "👩‍⚕️ Dra. Laura Sánchez (psicooncologia)"
+        "OncoBot (assistent)",
+        "Dr. Josep Maria (oncologia)",
+        "Dra. Laura Sánchez (psicooncologia)"
     ]
 )
 
 st.divider()
 
-if chat_option == "🤖 OncoBot (assistent)":
-    st.subheader("🤖 OncoBot")
+if chat_option == "OncoBot (assistent)":
+    st.subheader("OncoBot")
     st.caption("Assistent de suport cognitiu i seguiment diari")
 
     render_bot()
@@ -43,7 +43,7 @@ else:
         name = "Dra. Laura Sánchez"
         role = "Psicooncologia"
 
-    st.subheader(f"👨‍⚕️ {name}")
+    st.subheader(f"{name}")
     st.caption(role)
 
     # Mostrar historial de missatges
