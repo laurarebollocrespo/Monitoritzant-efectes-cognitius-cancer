@@ -24,7 +24,7 @@ c.execute("SELECT username, name FROM users ORDER BY username")
 pacients = c.fetchall()
 pacient_dict = {f"{name} ({username})": username for username, name in pacients}
 
-# Selector de pacient
+# Sel·lecciona pacient
 seleccio = st.selectbox("Selecciona un pacient:", list(pacient_dict.keys()))
 pacient = pacient_dict[seleccio]
 
@@ -39,10 +39,10 @@ for test in tests:
         (pacient, test),
     )
     dades = c.fetchall()
-    # Guardar com a diccionari {date: score}
+    # Dict {date: score}
     evolucio[test] = {row[0]: row[1] for row in dades}
 
-# Crear llista de totes les dates
+# Dates ordenades
 all_dates = sorted({d for test_scores in evolucio.values() for d in test_scores.keys()})
 
 # GRÀFIC 1: Evolució en línies
@@ -96,7 +96,6 @@ c.execute(
 dades_checkin = c.fetchall()
 conn.close()
 
-# Organitzar dades del pacient seleccionat
 scores_dict = {date: face for username, date, face in dades_checkin}
 all_dates = sorted(list(scores_dict.keys()))
 
@@ -127,10 +126,8 @@ dies_enrere = st.number_input(
 )
 
 
-def graf_incidents(pacient, dies_enrere):
-    from datetime import datetime, timedelta
-    import matplotlib.pyplot as plt
-    import sqlite3
+def grafic_incidents(pacient, dies_enrere):
+    """Elabora el gràfic de barres dels incidents d'un pacient (agrupats per tipus) fins fa dies_enrere."""
 
     data_max = datetime.today()
     data_min = data_max - timedelta(days=int(dies_enrere))
@@ -154,6 +151,8 @@ def graf_incidents(pacient, dies_enrere):
     for incidencia, count in dades_incidencies:
         comptador[incidencia] = count
 
+    # GRÀFIC 4: Gràfic de barres - Què m'ha passat? -
+
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.bar(range(10), comptador, color=plt.cm.tab10.colors)
     ax.set_xticks(range(10))
@@ -166,5 +165,4 @@ def graf_incidents(pacient, dies_enrere):
     st.pyplot(fig)
 
 
-# Cridar la funció amb el pacient seleccionat i dies_enrere actual
-graf_incidents(pacient, dies_enrere)
+grafic_incidents(pacient, dies_enrere)
