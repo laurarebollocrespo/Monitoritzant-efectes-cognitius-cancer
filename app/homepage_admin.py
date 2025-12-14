@@ -117,20 +117,19 @@ if selected_label != "Selecciona un pacient...":
         conn.close()
 
     with tab_xat:
-        st.subheader("💬 Xats amb el Pacient")
+        st.subheader("Xats amb el Pacient")
         # Connexió a la BD
         REPO_PATH = Path(__file__).resolve().parent.parent
         DB_PATH = REPO_PATH / "onco_connect.db"
         conn = sqlite3.connect(str(DB_PATH))
         c = conn.cursor()
 
-        st.title("Evolució del pacient")
+
 
         ############################################
         # Evolució tests objectius de cada pacient #
         ############################################
 
-        st.header("Evolució dels tests del pacient")
 
         # Llistar pacients
         c.execute("SELECT username, name FROM users ORDER BY username")
