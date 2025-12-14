@@ -119,32 +119,37 @@ col_brain, col_sep, col_actions = st.columns([1.5, 0.1, 1])
 
 # 1. CERVELL INTERACTIU (ESQUERRA)
 with col_brain:
-    st.write("") # Espai
+    st.write("") # Espai vertical
     
-    # CORRECCIÓ PRINCIPAL AQUÍ:
     if os.path.exists(BRAIN_PATH):
-        # Passem la RUTA (BRAIN_PATH), no el base64
-        coords = streamlit_image_coordinates(
-            BRAIN_PATH,
-            width=350,
-            key="brain_nav"
-        )
+        # TRUC PER CENTRAR: Columnes niades [buit, contingut, buit]
+        # Això empeny la imatge al centre visual de la columna esquerra
+        c_left, c_center, c_right = st.columns([1, 4, 1])
         
-        # LÒGICA DE NAVEGACIÓ
+        with c_center:
+            # Passem la RUTA (BRAIN_PATH) i width 350
+            coords = streamlit_image_coordinates(
+                BRAIN_PATH,
+                width=350,
+                key="brain_nav"
+            )
+        
+        # LÒGICA DE NAVEGACIÓ (Coordenades ajustades al 70%)
+        # Abans: 250, 200 -> Ara: 175, 140
         if coords:
             x, y = coords['x'], coords['y']
             
             # Quadrant Superior Esquerre: Fluència
-            if x < 250 and y < 200:
+            if x < 175 and y < 140:
                 st.switch_page("app/tests/fluencia.py")
             # Quadrant Superior Dret: Atenció
-            elif x > 250 and y < 200:
+            elif x > 175 and y < 140:
                 st.switch_page("app/tests/atencio.py")
             # Quadrant Inferior Esquerre: Memòria
-            elif x < 250 and y > 200:
+            elif x < 175 and y > 140:
                 st.switch_page("app/tests/memoria.py")
             # Quadrant Inferior Dret: Velocitat
-            elif x > 250 and y > 200:
+            elif x > 175 and y > 140:
                 st.switch_page("app/tests/velocitat.py")
     else:
         st.error(f"No s'ha trobat la imatge: {BRAIN_PATH}")
