@@ -87,8 +87,16 @@ Aplicació per al seguiment cognitiu i emocional de pacients oncològics, amb te
 
 ## Dependències
 
-- Streamlit
-- 
+- vosk
+- pyaudio
+- SpeechRecognition
+- streamlit
+- streamlit-image-coordinates
+- openai
+- pandas
+- plotly
+- matplotlib
+- numpy
 
 Per instal·lar les dependències:
 `pip install -r requirements.txt`
