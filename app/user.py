@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 
 # Importem database des del mateix paquet
-from app import database as db
+import database as db
 
 class User:
     name: str
