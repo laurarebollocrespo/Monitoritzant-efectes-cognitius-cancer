@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
-from user import User
+from app import user as u
 
 # Asignación de valores del usuario y constantes
 
@@ -102,47 +102,35 @@ def deficit_materiel(defic:int, ids:dict[int, list[str]], captions:dict[int, lis
 
     st.divider()
 
-def ponder(user: User) -> list[int]:
+def ponder(user: u.User) -> list[int]:
     """Valora las deficiencias cognitivas del usuario basándose en los últimos tests"""
     # Define thresholds (adjust based on your test scoring)
     # These are example thresholds - you'll need to calibrate them
-    THRESHOLDS = {
-        'Fluencia': {'severe': 40, 'moderate': 55, 'mild': 70},
-        'Atencio': {'severe': 35, 'moderate': 50, 'mild': 65},
-        'Memoria': {'severe': 30, 'moderate': 45, 'mild': 60},
-        'Velocitat': {'severe': 25, 'moderate': 40, 'mild': 55}
-    }
-    
+    THRESHOLDS = (70, 65, 60, 55)    
     deficits = []
     test_types = ['Fluencia', 'Atencio', 'Memoria', 'Velocitat']
     
-    for test_type in test_types:
+    for i in range(4):
+        test_type = test_types[i]
+
         results = user.test_results.get(test_type, [])
         
         if not results:
-            deficits.append(0)  # No data
             continue
         
         # Use last 5-10 results
-        recent_results = results[-10:] if len(results) >= 10 else results
+        recent_results = results[10] if len(results) >= 10 else results
         
         # Calculate average of recent results
         avg_score = sum(recent_results) / len(recent_results)
-        thresholds = THRESHOLDS[test_type]
         
         # Determine deficit level
-        if avg_score < thresholds['severe']:
-            deficits.append(3)  # Severe deficit
-        elif avg_score < thresholds['moderate']:
-            deficits.append(2)  # Moderate deficit
-        elif avg_score < thresholds['mild']:
-            deficits.append(1)  # Mild deficit
-        else:
-            deficits.append(0)  # Within normal range
-    
+        if avg_score < THRESHOLDS[i]:
+            deficits.append(i+1)
+
     return deficits
 
-def master(user:User)->None:
+def master(user: u.User)->None:
     """Inicializa la página y valora los déficits del usuario"""
     deficits = ponder(user)
 
@@ -167,5 +155,5 @@ def master(user:User)->None:
         st.markdown("* Fer Mindfulness")
 
 if __name__ == '__main__':
-    user = User('pe', 'pito', 0, 'ahir', {}, {})
+    user = st.session_state.user
     master(user)
