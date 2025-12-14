@@ -5,20 +5,19 @@ import time
 from difflib import get_close_matches
 import openai
 import threading
-import wave
+import os
 import json
-import numpy as np
 import pyaudio
 from vosk import Model, KaldiRecognizer
 from queue import Queue
-from threading import Thread, Event
+from threading import Thread
 import speech_recognition as sr  # Alternativa para simplificar
 
 # -----------------------------
 # Configuración de reconocimiento de voz
 # -----------------------------
 class VoiceRecognition:
-    def __init__(self, model_path="model/vosk-model-small-es-0.42"):
+    def __init__(self, model_path=os.path.join(os.path.dirname(__file__), "model/vosk-model-small-ca-0.4")):
         self.model_path = model_path
         self.recognizer = None
         self.audio_queue = Queue()
@@ -142,7 +141,8 @@ valid_letters = [l for l in "abcdefghijklmnopqrstuvwxyz" if l not in "wxyzhkgq"]
 all_words = set()
 all_words_list = []
 
-with open("noms-fdic.txt", "r", encoding="utf-8") as f:
+FILE_PATH = os.path.join(os.path.dirname(__file__), "noms-fdic.txt")
+with open(FILE_PATH, "r", encoding="utf-8") as f:
     for line in f:
         if line.strip():
             word = line.split("=")[0].strip()
