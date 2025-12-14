@@ -53,6 +53,7 @@ def init_db() -> None:
             username TEXT,
             date DATE DEFAULT CURRENT_DATE,
             face INTEGER CHECK(face BETWEEN 1 AND 5),
+            PRIMARY KEY(username, date),
             FOREIGN KEY(username) REFERENCES users(username)
         )
     ''')
@@ -223,6 +224,18 @@ def save_last_login(username)-> None:
     c.execute('UPDATE users SET last_login = CURRENT_DATE WHERE username = ?', (username,))
     conn.commit()
     conn.close()
+
+def get_last_test(username, test_type) -> str | None:
+    """Retorna la data de l'últim test realitzat d'un tipus, o None si no en té."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT date FROM test_results WHERE username = ? AND test_type = ? ORDER BY date DESC LIMIT 1',
+              (username, test_type))
+    data = c.fetchone()
+    conn.close()
+    if data:
+        return data[0]
+    return None
 
 if __name__ == "__main__":
     init_db()
