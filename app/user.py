@@ -3,7 +3,8 @@ import os
 from datetime import datetime, timedelta
 
 # Importem database des del mateix paquet
-from app import database as db
+import database as db
+
 
 class User:
     name: str
@@ -17,14 +18,14 @@ class User:
 
     def __init__(self, username):
         self.username = username
-        
+
         # 1. Carregar dades de la DB
         user_info = db.get_user_info(username)
         print(user_info)
         if user_info:
             self.name = user_info[0]
             self.streak = user_info[1] if user_info[1] is not None else 0
-            self.last_login = user_info[2] # String YYYY-MM-DD
+            self.last_login = user_info[2]  # String YYYY-MM-DD
             self.admin = True if user_info[3] else False
 
         else:
@@ -52,22 +53,21 @@ class User:
                 "Fluencia": db.get_test_history(username, "Fluencia"),
                 "Atencio": db.get_test_history(username, "Atencio"),
                 "Memoria": db.get_test_history(username, "Memoria"),
-                "Velocitat": db.get_test_history(username, "Velocitat")
+                "Velocitat": db.get_test_history(username, "Velocitat"),
             }
             self.daily_check_in = db.get_checkin_history(username)
 
             self.test_results = {
-            "Fluencia": db.get_test_history(username, "Fluencia"),
-            "Atencio": db.get_test_history(username, "Atencio"),
-            "Memoria": db.get_test_history(username, "Memoria"),
-            "Velocitat": db.get_test_history(username, "Velocitat")
+                "Fluencia": db.get_test_history(username, "Fluencia"),
+                "Atencio": db.get_test_history(username, "Atencio"),
+                "Memoria": db.get_test_history(username, "Memoria"),
+                "Velocitat": db.get_test_history(username, "Velocitat"),
             }
             self.daily_check_in = db.get_checkin_history(username)
             self.logs = db.get_logs(username)
 
         self.registrar_login()
         self.actualitza_last_login()
-        
 
     def _calculate_streak(self):
         """Calcula la ratxa basant-se en l'última connexió."""
@@ -90,7 +90,7 @@ class User:
             self.last_login = today_str
             db.update_streak(self.username, self.streak)
             return
-        
+
         print("Last login date:", last_login_date)
 
         delta = (today_date - last_login_date).days
@@ -101,7 +101,7 @@ class User:
         elif delta == 1:
             # Es va connectar ahir, sumem ratxa!
             self.streak += 1
-            print('Streak updated')
+            print("Streak updated")
             self.last_login = today_str
             db.update_streak(self.username, self.streak)
         else:
@@ -125,7 +125,7 @@ class User:
         db.save_test_result(self.username, "Memoria", float(nivel))
 
     def actualiza_punt_velocitat(self, t: float, num_errors: int):
-        
+
         # Score final pot ser temps + penalització
         score_final = t + (num_errors * 2)
         self.test_results["Velocitat"].append(score_final)
@@ -140,15 +140,15 @@ class User:
     def registrar_incidencia(self, incidencia_id: int):
         """Registra una nova incidència a la DB."""
         db.save_incidency(self.username, incidencia_id)
-        
+
     def registrar_log(self, text: str):
         """Registra una nova entrada de diari a la DB."""
         db.save_log(self.username, text)
-    
+
     def registrar_login(self):
         """Registra un nou login a la DB."""
         db.add_login_history(self.username)
-    
+
     def actualitza_last_login(self):
         """Actualitza la data de l'últim login a avui."""
         db.save_last_login(self.username)
