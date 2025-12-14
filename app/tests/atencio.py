@@ -4,6 +4,9 @@ import time
 
 NIVELL_FINAL = 10  # mirar si es 10 o 9
 
+def score(lvl:int)->float:
+    """Asigna un float de puntuación en función del nivel en el que se acaba el test"""
+    return (lvl-4)/5*100
 
 def test_atencio():
     st.title("Test d'Atenció")
@@ -159,32 +162,28 @@ def test_atencio():
             unsafe_allow_html=True,
         )
 
-        if st.session_state.game_over:
-            st.error(
-                "❌ Has fallat dues vegades seguides a aquest nivell. El test ha finalitzat."
-            )
-            if st.button("Tornar a l'inici"):
-                st.session_state.app_state = "instructions"
-                st.session_state.numbers = []
-                st.session_state.game_over = False
-                st.session_state.tries_in_level = 0
-                st.session_state.fails_in_level = 0
-                st.rerun()
-        elif st.session_state.level == NIVELL_FINAL:
-            st.error("✅ Has completat tots els nivells. El test ha finalitzat.")
-            if st.button("Tornar a l'inici"):
-                st.session_state.app_state = "instructions"
-                st.session_state.numbers = []
-                st.session_state.game_over = False
-                st.session_state.tries_in_level = 0
-                st.session_state.fails_in_level = 0
-                st.rerun()
-
-        else:
+        if not st.session_state.game_over:
             if st.button("Continuar"):
                 st.session_state.numbers = []
                 st.session_state.start_time = None
                 st.session_state.app_state = "test"
+                st.rerun()
+        else:
+            if st.session_state.level == NIVELL_FINAL:
+                st.error("✅ Has completat tots els nivells. El test ha finalitzat.")
+            else:
+                st.error(
+                "❌ Has fallat dues vegades seguides a aquest nivell. El test ha finalitzat."
+                )   
+            result = score(st.session_state.level)
+            st.session_state.user.actualiza_punt_memoria(result)
+            
+            if st.button("Tornar a l'inici"):
+                st.session_state.app_state = "instructions"
+                st.session_state.numbers = []
+                st.session_state.game_over = False
+                st.session_state.tries_in_level = 0
+                st.session_state.fails_in_level = 0
                 st.rerun()
 
 
