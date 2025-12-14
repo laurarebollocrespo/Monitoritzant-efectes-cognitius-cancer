@@ -5,6 +5,7 @@ from streamlit_image_coordinates import streamlit_image_coordinates
 
 # --- GESTIÓ DE SESSIÓ ---
 if 'user' not in st.session_state:
+    print('HOLAAAAAAA ')
     st.switch_page("app/login.py")
 
 
