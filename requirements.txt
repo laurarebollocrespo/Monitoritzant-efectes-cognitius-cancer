@@ -1,4 +1,12 @@
-streamlit
 vosk
 pyaudio
 SpeechRecognition
+streamlit
+streamlit-image-coordinates
+openai
+vosk
+pyaudio
+pandas
+plotly
+matplotlib
+numpy
