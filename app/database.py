@@ -242,5 +242,13 @@ if __name__ == "__main__":
     if create_user("pacient", "1234", "Joan Garcia"): # Usuari de prova
         print("Usuari 'pacient' creat correctament.")
         create_user("admin", "1234", "Administrador", admin=1) # Usuari admin de prova
+        create_user('pacient1', '1234', 'Joan Garcia')
+        create_user('pacient2', '1234', 'Maria Lopez')
+        create_user('pacient3', '1234', 'Pere Martinez')
+        create_user('pacient4', '1234', 'Anna Puig')
+        create_user('pacient5', '1234', 'Laura Sanchez')
+        create_user('pacient6', '1234', 'David Romero')
+        create_user('pacient7', '1234', 'Clara Vidal')
+        create_user('admin', '1234', 'Administrador')
     else:
         print("L'usuari ja existeix.")
