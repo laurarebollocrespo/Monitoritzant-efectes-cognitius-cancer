@@ -1,4 +1,3 @@
-# fluencia.py
 import streamlit as st
 from datetime import datetime, timedelta
 import sys, os
