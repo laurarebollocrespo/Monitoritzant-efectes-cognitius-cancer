@@ -4,6 +4,7 @@ import time
 
 NIVELL_FINAL = 10 
 
+user = st.session_state.user
 def test_atencio():
     st.title("Test d'Atenció")
 
@@ -88,7 +89,7 @@ def test_atencio():
             # Guardem el nivell assolit
             final_score = st.session_state.level if st.session_state.result == "fail" else st.session_state.level - 1
             st.session_state.user.actualiza_punt_atencio(final_score)
-            st.session_state.games_played[1] = True # Index 1 = Atenció
+            user.mark_game_played(1) # Index 1 = Atenció
             st.session_state.atencio_saved = True
             st.toast("Resultat guardat a la base de dades!")
         # -------------------------------------

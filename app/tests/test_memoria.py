@@ -4,6 +4,8 @@ import time
 
 NIVELL_FINAL = 9
 
+user = st.session_state.user
+
 def test_memoria():
     st.title("Test de Memòria")
 
@@ -80,7 +82,7 @@ def test_memoria():
         if (st.session_state.game_over or st.session_state.level > NIVELL_FINAL) and not st.session_state.memoria_saved:
             final_score = st.session_state.level if st.session_state.result == "fail" else st.session_state.level - 1
             st.session_state.user.actualiza_punt_memoria(final_score)
-            st.session_state.games_played[2] = True # Index 2 = Memoria
+            user.mark_game_played(2) # Index 2 = Memoria
             st.session_state.memoria_saved = True
             st.toast("Resultat guardat!")
         # --------------------------------------

@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 import time
-
+user = st.session_state.user
 def run_test():
     # --- CONFIGURACIÓ ---
     N_NUMBERS = 15
@@ -84,7 +84,7 @@ def run_test():
         # --- MODIFICACIÓ: GUARDAR ---
         if not st.session_state.velocitat_saved:
             st.session_state.user.actualiza_punt_velocitat(total_time, st.session_state.errors)
-            st.session_state.games_played[3] = True # Index 3
+            user.mark_game_played(3)
             st.session_state.velocitat_saved = True
             st.toast("Resultat guardat!")
         # ----------------------------

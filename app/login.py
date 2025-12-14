@@ -132,7 +132,6 @@ with col2:
         
         if user_data:
             st.session_state.logged_in = True
-            st.session_state.games_played = [False]*4  # Reset games played
             current_user = User(username)
             st.session_state.admin = current_user.admin
             st.session_state.user = current_user

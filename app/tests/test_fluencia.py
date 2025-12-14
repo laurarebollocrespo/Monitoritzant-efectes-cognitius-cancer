@@ -6,6 +6,8 @@ import openai
 import threading
 import os 
 
+user = st.session_state.user
+
 # -----------------------------
 # Dataset de palabras
 # -----------------------------
@@ -210,8 +212,7 @@ def run_fluencia():
         # --- GUARDAR A BASE DE DADES ---
         if not st.session_state.fluencia_saved:
             st.session_state.user.actualiza_punt_fluencia(correct)
-            if 'games_played' in st.session_state:
-                st.session_state.games_played[0] = True # Índex 0 = Fluència
+            user.mark_game_played(0)
             st.session_state.fluencia_saved = True
             st.toast("Resultats guardats correctament!", icon="💾")
         # -------------------------------

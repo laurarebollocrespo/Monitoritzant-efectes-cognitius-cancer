@@ -9,14 +9,21 @@ import test_fluencia
 if 'user' not in st.session_state: st.switch_page("app/login.py")
 user = st.session_state.user
 
-last_test_played = user.last_test_date("Fluencia")
+# --- LÒGICA 6 MESOS ---
+last_test_played = user.last_test_date("Fluencia") # Nom exacte a la DB
+
 if last_test_played:
     try:
         last_date = datetime.strptime(last_test_played, "%Y-%m-%d").date()
-        if (datetime.now().date() - last_date).days < 180:
-            st.info("⏳ Test disponible en 6 mesos.")
-            if st.button("Tornar"): st.switch_page("app/homepage.py")
+        today = datetime.now().date()
+        if (today - last_date).days < 180:
+            next_date = last_date + timedelta(days=180)
+            st.info(f"⏳ Aquest test només es pot realitzar cada 6 mesos.\n\nData disponible: **{next_date.strftime('%d/%m/%Y')}**")
+            if st.button("Tornar a l'Inici"):
+                st.switch_page("app/homepage.py")
             st.stop()
-    except: pass
+    except ValueError:
+        pass # Si hi ha error de format, deixem passar
 
+# Executar el test
 test_fluencia.run_fluencia()

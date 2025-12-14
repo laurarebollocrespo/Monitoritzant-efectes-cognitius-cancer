@@ -7,60 +7,57 @@ from streamlit_image_coordinates import streamlit_image_coordinates
 if 'user' not in st.session_state:
     st.switch_page("app/login.py")
 
-# Inicialitzar estat dels jocs si no existeix (per seguretat)
-if 'games_played' not in st.session_state:
-    # Indexs: 0:Fluencia, 1:Atencio, 2:Memoria, 3:Velocitat
-    st.session_state.games_played = [False, False, False, False]
-user = st.session_state.user
 
+user = st.session_state.user
+games_state = user.games_played
 
 def get_dynamic_brain_image(games_state):
     """
-    Converteix l'estat [True, False, True, False] en el nom del fitxer "brain_1010.png"
+    Converteix l'estat [0, 1, 0, 1] en el nom del fitxer.
     """
     # Convertim booleans a string binari (ex: "1010")
-    binary_suffix = "".join(["1" if game else "0" for game in games_state])
+    binary_suffix = "".join([str(x) for x in games_state])
     
-    # Ruta esperada
-    expected_path = f"images/brain_states/brain_{binary_suffix}.png"
+    # Ruta esperada (assegura't que el nom del fitxer coincideix amb el que tens a la carpeta)
+    expected_path = f"images/brain_{binary_suffix}-removebg-preview.png"
     
-    # FALLBACK: Si la imatge exacta no existeix (per si no heu tingut temps de fer les 16),
-    # mostrem la imatge totalment acolorida o la totalment grisa com a seguretat.
+    # FALLBACK
     if os.path.exists(expected_path):
         return expected_path
     else:
-        # Si han jugat alguna cosa, mostrem el full color, sino el gris.
+        # Si no troba la imatge exacta, lògica de seguretat:
         if any(games_state):
-             return "images/brain_areas.png" # La imatge original (tota color)
+             # Si tens una imatge genèrica acolorida, posa-la aquí:
+             return "images/brain_areas.png" 
         else:
-             return "images/brain_states/brain_0000.png" # Assegura't de tenir almenys la 0000 feta!
-        
+             # Imatge per defecte (tot gris)
+             return "images/brain_0000.png" 
 
-# --- CARREGAR IMATGES ---
+# --- CARREGAR IMATGES (PER AL LOGO HTML) ---
 def get_base64_image(image_path):
-    # Busquem la imatge des de l'arrel del projecte
     if os.path.exists(image_path):
         with open(image_path, "rb") as f:
             return base64.b64encode(f.read()).decode()
     return ""
 
-# Rutes a les imatges (des de l'arrel on s'executa main.py)
-LOGO_B64 = get_base64_image("images/logo.png")
-BRAIN_B64 = get_base64_image(get_dynamic_brain_image(st.session_state.games_played))
+# 1. Calculem quina imatge del cervell toca (RUTA)
+BRAIN_PATH = get_dynamic_brain_image(games_state)
 
-# --- CSS PERSONALITZAT (ESTIL EXACTE REFERÈNCIA) ---
+# 2. Carreguem el logo en Base64 (per al HTML/CSS)
+LOGO_B64 = get_base64_image("images/logo.png")
+
+# --- CSS PERSONALITZAT ---
 st.markdown(f"""
     <style>
-    /* Importar font neta */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
     html, body, [class*="css"] {{
         font-family: 'Poppins', sans-serif;
     }}
 
-    /* 1. HEADER PERSONALITZAT */
+    /* HEADER PERSONALITZAT */
     .custom-header {{
-        background-color: #A8E6CF; /* Verd fons capçalera */
+        background-color: #A8E6CF;
         padding: 10px 30px;
         display: flex;
         justify_content: space-between;
@@ -70,91 +67,37 @@ st.markdown(f"""
         color: #333;
     }}
     
-    .logo-img {{
-        height: 40px;
-        margin-right: 10px;
-        vertical-align: middle;
-    }}
+    .logo-img {{ height: 40px; margin-right: 10px; vertical-align: middle; }}
     
-    .header-right {{
-        font-size: 18px;
-        display: flex;
-        gap: 30px;
-        align-items: center;
-    }}
+    .header-right {{ font-size: 18px; display: flex; gap: 30px; align-items: center; }}
     
-    .logout-text {{
-        font-weight: bold;
-        cursor: pointer; /* Visualment sembla clicable */
-    }}
+    .logout-text {{ font-weight: bold; cursor: pointer; }}
 
-    /* 2. BENVINGUDA */
+    /* BENVINGUDA */
     .welcome-container {{
-        background-color: #E0F7FA; /* Blau/Verd molt clar de fons */
+        background-color: #E0F7FA;
         padding: 20px;
         border-radius: 10px;
         margin-bottom: 30px;
     }}
     
-    h1 {{
-        color: black;
-        font-size: 32px;
-        font-weight: 800;
-        margin: 0;
-        padding: 0;
-    }}
+    h1 {{ color: black; font-size: 32px; font-weight: 800; margin: 0; padding: 0; }}
+    h2 {{ color: #333; font-size: 20px; font-weight: 400; margin: 0; margin-bottom: 5px; }}
     
-    h2 {{
-        color: #333;
-        font-size: 20px;
-        font-weight: 400;
-        margin: 0;
-        margin-bottom: 5px;
-    }}
-    
-    .streak {{
-        font-size: 16px;
-        color: #555;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        margin-top: 10px;
-    }}
+    .streak {{ font-size: 16px; color: #555; display: flex; align-items: center; gap: 5px; margin-top: 10px; }}
 
-    /* 3. BOTONS D'ACCIÓ (DRETA) */
+    /* BOTONS D'ACCIÓ */
     .stButton button {{
-        background-color: #98D8C1 !important;
-        color: black !important;
-        border: none !important;
-        border-radius: 30px !important; /* Molt rodons */
-        padding: 15px 20px !important;
-        font-weight: bold !important;
-        font-size: 16px !important;
-        box-shadow: 0px 4px 6px rgba(0,0,0,0.1) !important;
-        width: 100%;
-        transition: transform 0.1s;
+        background-color: #98D8C1 !important; color: black !important; border: none !important;
+        border-radius: 30px !important; padding: 15px 20px !important; font-weight: bold !important;
+        font-size: 16px !important; box-shadow: 0px 4px 6px rgba(0,0,0,0.1) !important;
+        width: 100%; transition: transform 0.1s;
     }}
+    .stButton button:hover {{ background-color: #86C9B5 !important; transform: translateY(-2px); }}
     
-    .stButton button:hover {{
-        background-color: #86C9B5 !important;
-        transform: translateY(-2px);
-    }}
+    .eines-title {{ text-align: right; font-size: 36px; margin-top: 50px; font-weight: 300; color: black; letter-spacing: 1px; }}
     
-    .eines-title {{
-        text-align: right;
-        font-size: 36px;
-        margin-top: 50px;
-        font-weight: 300;
-        color: black;
-        letter-spacing: 1px;
-    }}
-    
-    /* Separador vertical */
-    .vertical-line {{
-        border-left: 1px solid #ccc;
-        height: 100%;
-        margin: 0 auto;
-    }}
+    .vertical-line {{ border-left: 1px solid #ccc; height: 100%; margin: 0 auto; }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -177,36 +120,34 @@ col_brain, col_sep, col_actions = st.columns([1.5, 0.1, 1])
 with col_brain:
     st.write("") # Espai
     
+    # CORRECCIÓ PRINCIPAL AQUÍ:
     if os.path.exists(BRAIN_PATH):
-        # Renderitzar imatge i capturar click
+        # Passem la RUTA (BRAIN_PATH), no el base64
         coords = streamlit_image_coordinates(
             BRAIN_PATH,
-            width=500, # Amplada fixa per calibrar bé els clicks
+            width=500,
             key="brain_nav"
         )
         
-        # LÒGICA DE NAVAGACIÓ SEGONS COORDENADES
-        # (Ajusta aquests valors segons la teva imatge de 500px d'ample)
+        # LÒGICA DE NAVEGACIÓ
         if coords:
             x, y = coords['x'], coords['y']
             
             # Quadrant Superior Esquerre: Fluència
             if x < 250 and y < 200:
                 st.switch_page("app/tests/fluencia.py")
-                
             # Quadrant Superior Dret: Atenció
             elif x > 250 and y < 200:
                 st.switch_page("app/tests/atencio.py")
-                
             # Quadrant Inferior Esquerre: Memòria
             elif x < 250 and y > 200:
                 st.switch_page("app/tests/memoria.py")
-                
-            # Quadrant Inferior Dret: Velocitat (Agilitat)
+            # Quadrant Inferior Dret: Velocitat
             elif x > 250 and y > 200:
                 st.switch_page("app/tests/velocitat.py")
     else:
-        st.error(f"No s'ha trobat la imatge: {BRAIN_PATH}. Assegura't que està a la carpeta images/")
+        st.error(f"No s'ha trobat la imatge: {BRAIN_PATH}")
+        st.info("Assegura't que les imatges existeixen a la carpeta 'images/'")
 
 # 2. SEPARADOR (CENTRE)
 with col_sep:
@@ -220,11 +161,10 @@ with col_actions:
     if st.button("Com em sento avui?"):
         st.switch_page("app/checkin.py")
         
-    st.write("") # Espai
+    st.write("")
     
     if st.button("Què m'ha passat?"):
         st.switch_page("app/incidencies.py")
             
-    # Àrea clicable per anar a Eines (com a botó invisible o botó text)
     if st.button("Veure totes les eines ->", key="btn_eines", use_container_width=True):
         st.switch_page("app/eines.py")
