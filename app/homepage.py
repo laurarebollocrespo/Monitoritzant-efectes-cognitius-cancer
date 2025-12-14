@@ -126,7 +126,7 @@ with col_brain:
         # Passem la RUTA (BRAIN_PATH), no el base64
         coords = streamlit_image_coordinates(
             BRAIN_PATH,
-            width=500,
+            width=350,
             key="brain_nav"
         )
         
