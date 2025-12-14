@@ -3,7 +3,7 @@ import streamlit as st
 import openai
 
 # Configurar tu API key
-API_KEY = "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"
+API_KEY = "API_KEY"
 client = openai.OpenAI(api_key=API_KEY)
 
 # Inicializa estado de sesión
